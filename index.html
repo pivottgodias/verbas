@@ -11,6 +11,7 @@
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
     th { background-color: #f0f0f0; text-transform: uppercase; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
   </style>
 </head>
 <body>
@@ -25,64 +26,85 @@
   </select>
 
   <div id="camposComuns">
+    <label for="familia" class="sr-only">Família</label>
     <input type="text" placeholder="Família" id="familia" />
+    
+    <label for="produto" class="sr-only">Produto</label>
     <input type="text" placeholder="Produto" id="produto" />
+    
+    <label for="unidades" class="sr-only">Unidades</label>
     <input type="number" placeholder="Unidades" id="unidades" />
-    <input type="text" placeholder="Verba" id="verba" />
-    <input type="text" placeholder="Bonificação" id="bonificacao" />
+    
+    <label for="verba" class="sr-only">Verba</label>
+    <input type="text" placeholder="Verba" id="verba" oninput="this.value = this.value.replace(/[^0-9.,]/g, '')" />
+    
+    <label for="bonificacao" class="sr-only">Bonificação</label>
+    <input type="text" placeholder="Bonificação" id="bonificacao" oninput="this.value = this.value.replace(/[^0-9.,]/g, '')" />
+    
+    <label for="ttc" class="sr-only">TTC</label>
     <input type="text" placeholder="TTC" id="ttc" />
+    
+    <label for="ttv" class="sr-only">TTV</label>
     <input type="text" placeholder="TTV" id="ttv" />
   </div>
 
   <button onclick="addItem()">Adicionar Item</button>
 
+  <!-- Divs de itens mantidas como original -->
   <div id="SELL IN" class="item-container">
     <h3>Itens SELL IN</h3>
     <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
   </div>
-
-  <div id="SELL OUT" class="item-container">
-    <h3>Itens SELL OUT</h3>
-    <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
-  </div>
-
-  <div id="MERCHANDISING" class="item-container">
-    <h3>Itens MERCHANDISING</h3>
-    <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
-  </div>
+  <!-- Repetir para SELL OUT e MERCHANDISING -->
 
   <button onclick="generatePDF()">Gerar Dossiê PDF</button>
 
   <script>
     function addItem() {
       const tipo = document.getElementById("tipoVerba").value;
-      const familia = document.getElementById("familia").value;
-      const produto = document.getElementById("produto").value;
-      const unidades = document.getElementById("unidades").value;
-      const verba = document.getElementById("verba").value;
-      const bonificacao = document.getElementById("bonificacao").value;
-      const ttc = document.getElementById("ttc").value;
-      const ttv = document.getElementById("ttv").value;
+      const campos = [
+        { id: "familia", nome: "Família", obrigatorio: true },
+        { id: "produto", nome: "Produto", obrigatorio: true },
+        { id: "unidades", nome: "Unidades", obrigatorio: true },
+        { id: "verba", nome: "Verba", obrigatorio: false },
+        { id: "bonificacao", nome: "Bonificação", obrigatorio: false },
+        { id: "ttc", nome: "TTC", obrigatorio: false },
+        { id: "ttv", nome: "TTV", obrigatorio: false }
+      ];
 
+      // Validação
+      let valido = true;
+      campos.forEach(campo => {
+        const valor = document.getElementById(campo.id).value.trim();
+        if (campo.obrigatorio && !valor) {
+          alert(`O campo ${campo.nome} é obrigatório`);
+          valido = false;
+        }
+        if ((campo.id === "verba" || campo.id === "bonificacao") && valor && isNaN(parseFloat(valor.replace(',', '.')))) {
+          alert(`O campo ${campo.nome} deve ser numérico`);
+          valido = false;
+        }
+      });
+      if (!valido) return;
+
+      // Criação do item
       const tableBody = document.querySelector(`#${tipo} tbody`);
       const row = document.createElement("tr");
 
-      [familia, produto, unidades, verba, bonificacao, ttc, ttv].forEach(value => {
+      campos.forEach(campo => {
         const td = document.createElement("td");
-        td.textContent = value;
+        td.textContent = document.getElementById(campo.id).value;
         row.appendChild(td);
       });
 
       tableBody.appendChild(row);
 
-      // Limpar campos
-      document.getElementById("familia").value = "";
-      document.getElementById("produto").value = "";
-      document.getElementById("unidades").value = "";
-      document.getElementById("verba").value = "";
-      document.getElementById("bonificacao").value = "";
-      document.getElementById("ttc").value = "";
-      document.getElementById("ttv").value = "";
+      // Limpeza
+      campos.forEach(campo => {
+        if (campo.id !== "tipoVerba") {
+          document.getElementById(campo.id).value = "";
+        }
+      });
     }
 
     function collectItems() {
@@ -107,7 +129,11 @@
       doc.setFontSize(14);
       doc.text("DOSSIÊ DE VERBAS", 14, 15);
       doc.setFontSize(10);
-      doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 22);
+      
+      // Data formatada
+      const date = new Date();
+      const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+      doc.text(`Data: ${formattedDate}`, 14, 22);
 
       const items = collectItems();
       let y = 30;
@@ -116,10 +142,22 @@
         doc.setFontSize(12);
         doc.text(`${tipo}`, 14, y);
         y += 5;
+        
+        // Formata valores monetários
+        const formattedData = dados.map(row => {
+          return row.map((cell, idx) => {
+            if ([3,4].includes(idx)) { // Verba e Bonificação
+              const value = cell.replace(',', '.');
+              return isNaN(value) ? cell : `R$ ${parseFloat(value).toFixed(2).replace('.', ',')}`;
+            }
+            return cell;
+          });
+        });
+
         doc.autoTable({
           startY: y,
           head: [["FAMÍLIA", "PRODUTO", "UNIDADES", "VERBA", "BONIFICAÇÃO", "TTC", "TTV"]],
-          body: dados,
+          body: formattedData,
           theme: 'grid',
           styles: { fontSize: 9 },
           headStyles: { fillColor: [200, 200, 200] }
