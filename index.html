@@ -193,271 +193,241 @@
   <!-- Biblioteca pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    document.addEventListener('DOMContentLoaded', () => {
+      const { PDFDocument, StandardFonts, rgb } = PDFLib;
 
-    // Abas
-    const tabs = document.querySelectorAll('.tabs-nav li');
-    const contents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        contents.forEach(c => c.classList.remove('active'));
-        document.getElementById(tab.dataset.tab).classList.add('active');
+      // Tabs
+      const tabs = document.querySelectorAll('.tabs-nav li');
+      const contents = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          contents.forEach(c => c.classList.remove('active'));
+          document.getElementById(tab.dataset.tab).classList.add('active');
+        });
       });
-    });
 
-    // Inicialização de linhas dinâmicas
-    function initRows() {
-      // SELL OUT & SELL IN
-      ['#items-container-sell-out', '#items-container-sell-in'].forEach(container => {
-        document.querySelectorAll(container + ' .item-row').forEach(row => {
-          row.querySelector('.remove-item').addEventListener('click', () => {
-            const p = row.parentElement;
-            if (p.childElementCount > 1) p.removeChild(row);
-            else alert('Ao menos um item.');
-          });
-          ['.item-bonificacao','.item-unidades'].forEach(sel => {
-            row.querySelector(sel).addEventListener('input', () => {
-              const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
-              const und = parseFloat(row.querySelector('.item-unidades').value)||0;
-              row.querySelector('.item-verba').value = (bon*und).toFixed(2);
+      // Initialize rows (remove/edit listeners)
+      function initRows() {
+        // SELL OUT & SELL IN
+        ['#items-container-sell-out', '#items-container-sell-in'].forEach(container => {
+          document.querySelectorAll(container + ' .item-row').forEach(row => {
+            row.querySelector('.remove-item').onclick = () => {
+              const p = row.parentElement;
+              if (p.childElementCount > 1) p.removeChild(row);
+              else alert('Você deve ter ao menos um item.');
+            };
+            ['.item-bonificacao','.item-unidades'].forEach(sel => {
+              row.querySelector(sel).oninput = () => {
+                const bon = parseFloat(row.querySelector('.item-bonificacao').value) || 0;
+                const und = parseFloat(row.querySelector('.item-unidades').value) || 0;
+                row.querySelector('.item-verba').value = (bon * und).toFixed(2);
+              };
             });
           });
         });
-      });
-      // MERCHANDISING
-      document.querySelectorAll('#merch-items-container .merch-item-row').forEach(row => {
-        row.querySelector('.remove-merch-item').addEventListener('click', () => {
-          const p = row.parentElement;
-          if (p.childElementCount > 1) p.removeChild(row);
-          else alert('Ao menos um item.');
-        });
-      });
-    }
-    initRows();
-    document.getElementById('add-item-sell-out').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-out .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value = '');
-      document.getElementById('items-container-sell-out').appendChild(nw);
-      initRows();
-    });
-    document.getElementById('add-item-sell-in').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-in .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value = '');
-      document.getElementById('items-container-sell-in').appendChild(nw);
-      initRows();
-    });
-    document.getElementById('add-merch-item').addEventListener('click', () => {
-      const tpl = document.querySelector('#merch-items-container .merch-item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
-      document.getElementById('merch-items-container').appendChild(nw);
-      initRows();
-    });
-
-    // Coleta de dados
-    function collectSellOut() {
-      return Array.from(document.querySelectorAll('#items-container-sell-out .item-row'))
-        .map(r => ({
-          Familia: r.querySelector('input[name="item_familia[]"]').value || '',
-          Produto: r.querySelector('input[name="item_produto[]"]').value || '',
-          Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
-          Verba: r.querySelector('input[name="item_verba[]"]').value || '',
-          Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
-          TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
-          TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
-        }));
-    }
-    function collectSellIn() {
-      return Array.from(document.querySelectorAll('#items-container-sell-in .item-row'))
-        .map(r => ({
-          Familia: r.querySelector('input[name="item_familia[]"]').value || '',
-          Produto: r.querySelector('input[name="item_produto[]"]').value || '',
-          Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
-          Verba: r.querySelector('input[name="item_verba[]"]').value || '',
-          Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
-          TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
-          TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
-        }));
-    }
-    function collectMerch() {
-      return Array.from(document.querySelectorAll('#merch-items-container .merch-item-row'))
-        .map(r => ({
-          'Verba (R$)': r.querySelector('input[name="merch_item_verba[]"]').value || '',
-          Opcao: r.querySelector('select[name="merch_item_opcao[]"]').value || ''
-        }));
-    }
-
-    // Desenha tabela estilo Excel
-    function drawTable(pdfDoc, page, font, yStart, title, headers, rows, colX) {
-      if (!rows.length) return { page, y: yStart };
-      let y = yStart;
-      page.drawText(title, { x: 50, y, size: 14, font });
-      y -= 20;
-      const rowHeight = 20;
-      const colCount = headers.length;
-      const pageWidth = page.getWidth();
-      // calcula larguras de colunas
-      const colWidths = headers.map((_, i) => {
-        if (i < colCount - 1) return colX[i+1] - colX[i];
-        return pageWidth - colX[i] - 50;
-      });
-      const tableX = colX[0];
-      const tableWidth = colWidths.reduce((a,b) => a + b, 0);
-      const tableHeight = rowHeight * (rows.length + 1);
-
-      // linhas horizontais
-      for (let i = 0; i <= rows.length + 1; i++) {
-        const yy = y - i * rowHeight;
-        page.drawLine({
-          start: { x: tableX, y: yy },
-          end:   { x: tableX + tableWidth, y: yy },
-          thickness: 1,
-          color: rgb(0,0,0)
+        // MERCHANDISING
+        document.querySelectorAll('#merch-items-container .merch-item-row').forEach(row => {
+          row.querySelector('.remove-merch-item').onclick = () => {
+            const p = row.parentElement;
+            if (p.childElementCount > 1) p.removeChild(row);
+            else alert('Você deve ter ao menos um item.');
+          };
         });
       }
-      // linhas verticais
-      let x = tableX;
-      for (let w of colWidths) {
-        page.drawLine({
-          start: { x, y },
-          end:   { x, y - tableHeight },
-          thickness: 1,
-          color: rgb(0,0,0)
-        });
-        x += w;
+
+      // Add-item button listeners
+      document.getElementById('add-item-sell-out').onclick = () => {
+        const tpl = document.querySelector('#items-container-sell-out .item-row');
+        const nw = tpl.cloneNode(true);
+        nw.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('items-container-sell-out').appendChild(nw);
+        initRows();
+      };
+      document.getElementById('add-item-sell-in').onclick = () => {
+        const tpl = document.querySelector('#items-container-sell-in .item-row');
+        const nw = tpl.cloneNode(true);
+        nw.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('items-container-sell-in').appendChild(nw);
+        initRows();
+      };
+      document.getElementById('add-merch-item').onclick = () => {
+        const tpl = document.querySelector('#merch-items-container .merch-item-row');
+        const nw = tpl.cloneNode(true);
+        nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
+        document.getElementById('merch-items-container').appendChild(nw);
+        initRows();
+      };
+
+      // Initial call
+      initRows();
+
+      // Data collection helpers
+      function collectSellOut() {
+        return Array.from(document.querySelectorAll('#items-container-sell-out .item-row'))
+          .map(r => ({
+            Familia: r.querySelector('input[name="item_familia[]"]').value || '',
+            Produto: r.querySelector('input[name="item_produto[]"]').value || '',
+            Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+            Verba: r.querySelector('input[name="item_verba[]"]').value || '',
+            Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+            TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
+            TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
+          }));
       }
-      // linha final
-      page.drawLine({
-        start: { x: tableX + tableWidth, y },
-        end:   { x: tableX + tableWidth, y - tableHeight },
-        thickness: 1,
-        color: rgb(0,0,0)
-      });
+      function collectSellIn() {
+        return Array.from(document.querySelectorAll('#items-container-sell-in .item-row'))
+          .map(r => ({
+            Familia: r.querySelector('input[name="item_familia[]"]').value || '',
+            Produto: r.querySelector('input[name="item_produto[]"]').value || '',
+            Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+            Verba: r.querySelector('input[name="item_verba[]"]').value || '',
+            Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+            TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
+            TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
+          }));
+      }
+      function collectMerch() {
+        return Array.from(document.querySelectorAll('#merch-items-container .merch-item-row'))
+          .map(r => ({
+            'Verba (R$)': r.querySelector('input[name="merch_item_verba[]"]').value || '',
+            Opcao: r.querySelector('select[name="merch_item_opcao[]"]').value || ''
+          }));
+      }
 
-      // escreve cabeçalho em caixa alta
-      let textY = y - 15;
-      headers.forEach((h,i) => {
-        page.drawText(h.toUpperCase(), {
-          x: colX[i] + 2,
-          y: textY,
-          size: 12,
-          font
-        });
-      });
+      // Draw Excel-style table
+      function drawTable(pdfDoc, page, font, yStart, title, headers, rows, colX) {
+        if (!rows.length) return { page, y: yStart };
+        let y = yStart;
+        page.drawText(title, { x: 50, y, size: 14, font });
+        y -= 20;
+        const rowH = 20;
+        const count = headers.length;
+        const width = page.getWidth();
+        const colW = headers.map((_, i) =>
+          i < count-1 ? colX[i+1]-colX[i] : width - colX[i] - 50
+        );
+        const startX = colX[0];
+        const totalW = colW.reduce((a,b)=>a+b,0);
+        const totalH = rowH * (rows.length + 1);
 
-      // escreve linhas de dados
-      rows.forEach((row, rIdx) => {
-        const values = Object.values(row);
-        const rowY = y - rowHeight * (rIdx + 1) - 15;
-        values.forEach((val, cIdx) => {
-          page.drawText(val.toString(), {
-            x: colX[cIdx] + 2,
-            y: rowY,
-            size: 10,
-            font
-          });
-        });
-      });
-
-      return { page, y: y - tableHeight - 10 };
-    }
-
-    // Geração do PDF
-    document.getElementById('form-dossie').addEventListener('submit', async e => {
-      e.preventDefault();
-      const files = document.getElementById('dossie_files').files;
-      if (!files.length) return alert('Selecione arquivos para o dossiê.');
-
-      const rede     = document.getElementById('rede').value;
-      const mercado  = document.getElementById('mercado').value;
-      const cidade   = document.getElementById('cidade').value;
-      const uf       = document.getElementById('uf').value;
-      const vendedor = document.getElementById('vendedor').value;
-      const contrato = document.getElementById('contrato').value;
-      const tipo     = document.querySelector('.tabs-nav li.active').textContent;
-
-      const sellOut = collectSellOut();
-      const sellIn  = collectSellIn();
-      const merch   = collectMerch();
-
-      const pdfDoc = await PDFDocument.create();
-      let page = pdfDoc.addPage([595.28, 841.89]);
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      let y = 800;
-
-      // Capa
-      page.drawText('Dossiê de Verba', { x: 50, y, size: 24, font });
-      y -= 30;
-      [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
-        `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
-        `Data: ${new Date().toLocaleDateString()}` ]
-        .forEach(line => {
-          page.drawText(line, { x: 50, y, size: 12, font });
-          y -= 18;
-        });
-      y -= 10;
-
-      // Tabelas
-      ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'SELL OUT',
-        ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
-        sellOut,
-        [50, 140, 260, 330, 400, 470, 530]
-      ));
-      ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'SELL IN',
-        ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
-        sellIn,
-        [50, 140, 260, 330, 400, 470, 530]
-      ));
-      ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'MERCHANDISING',
-        ['Verba (R$)','Opção'],
-        merch,
-        [50, 200]
-      ));
-
-      // Anexos
-      for (const file of files) {
-        const buf = await file.arrayBuffer();
-        if (file.type.startsWith('image/')) {
-          const img = file.type === 'image/png'
-            ? await pdfDoc.embedPng(buf)
-            : await pdfDoc.embedJpg(buf);
-          const imgPage = pdfDoc.addPage([595.28, 841.89]);
-          const { width, height } = imgPage.getSize();
-          const dims = img.scaleToFit(width - 40, height - 40);
-          imgPage.drawImage(img, {
-            x: 20, y: height - dims.height - 20,
-            width: dims.width, height: dims.height
-          });
-        } else if (file.type === 'application/pdf') {
-          const donor = await PDFDocument.load(buf);
-          const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copied.forEach(p => pdfDoc.addPage(p));
+        // draw grid
+        for (let i=0; i<=rows.length+1; i++) {
+          const yy = y - i*rowH;
+          page.drawLine({ start:{x:startX,y:yy}, end:{x:startX+totalW,y:yy}, thickness:1, color:rgb(0,0,0) });
         }
+        let xx = startX;
+        for (let w of colW) {
+          page.drawLine({ start:{x:xx,y}, end:{x:xx,y-totalH}, thickness:1, color:rgb(0,0,0) });
+          xx += w;
+        }
+        page.drawLine({ start:{x:startX+totalW,y}, end:{x:startX+totalW,y-totalH}, thickness:1, color:rgb(0,0,0) });
+
+        // header text
+        let ty = y - 15;
+        headers.forEach((h,i) => {
+          page.drawText(h.toUpperCase(), { x:colX[i]+2, y:ty, size:12, font });
+        });
+        // rows
+        rows.forEach((row,rIdx) => {
+          const vals = Object.values(row);
+          const ry = y - rowH*(rIdx+1) - 15;
+          vals.forEach((v,cIdx) => {
+            page.drawText(v.toString(), { x:colX[cIdx]+2, y:ry, size:10, font });
+          });
+        });
+
+        return { page, y: y - totalH - 10 };
       }
 
-      // Salva e download
-      const pdfBytes = await pdfDoc.save();
-      window._lastPdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(window._lastPdfBlob);
-      a.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
-      a.click();
+      // Generate PDF
+      document.getElementById('form-dossie').addEventListener('submit', async e => {
+        e.preventDefault();
+        const files = document.getElementById('dossie_files').files;
+        if (!files.length) return alert('Selecione arquivos para o dossiê.');
 
-      // Exibe DocuSign
-      document.getElementById('btn-docusign').style.display = 'block';
-    });
+        const rede     = document.getElementById('rede').value;
+        const mercado  = document.getElementById('mercado').value;
+        const cidade   = document.getElementById('cidade').value;
+        const uf       = document.getElementById('uf').value;
+        const vendedor = document.getElementById('vendedor').value;
+        const contrato = document.getElementById('contrato').value;
+        const tipo     = document.querySelector('.tabs-nav li.active').textContent;
 
-    // DocuSign stub
-    document.getElementById('btn-docusign').addEventListener('click', () => {
-      if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
-      alert('Enviando para DocuSign...');
+        const sellOut = collectSellOut();
+        const sellIn  = collectSellIn();
+        const merch   = collectMerch();
+
+        const pdfDoc = await PDFDocument.create();
+        let page = pdfDoc.addPage([595.28, 841.89]);
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        let y = 800;
+
+        // cover
+        page.drawText('Dossiê de Verba', { x:50, y, size:24, font });
+        y -= 30;
+        [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
+          `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
+          `Data: ${new Date().toLocaleDateString()}` ]
+          .forEach(line => { page.drawText(line, { x:50, y, size:12, font }); y -= 18; });
+        y -= 10;
+
+        // tables
+        ({ page,y } = drawTable(pdfDoc, page, font, y,
+          'SELL OUT',
+          ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
+          sellOut,
+          [50,140,260,330,400,470,530]
+        ));
+        ({ page,y } = drawTable(pdfDoc, page, font, y,
+          'SELL IN',
+          ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
+          sellIn,
+          [50,140,260,330,400,470,530]
+        ));
+        ({ page,y } = drawTable(pdfDoc, page, font, y,
+          'MERCHANDISING',
+          ['Verba (R$)','Opção'],
+          merch,
+          [50,200]
+        ));
+
+        // attachments
+        for (const file of files) {
+          const buf = await file.arrayBuffer();
+          if (file.type.startsWith('image/')) {
+            const img = file.type==='image/png'
+              ? await pdfDoc.embedPng(buf)
+              : await pdfDoc.embedJpg(buf);
+            const imgPage = pdfDoc.addPage([595.28,841.89]);
+            const { width,height } = imgPage.getSize();
+            const dims = img.scaleToFit(width-40, height-40);
+            imgPage.drawImage(img, { x:20, y:height-dims.height-20, width:dims.width, height:dims.height });
+          } else if (file.type==='application/pdf') {
+            const donor = await PDFDocument.load(buf);
+            const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
+            copied.forEach(p => pdfDoc.addPage(p));
+          }
+        }
+
+        // save & download
+        const pdfBytes = await pdfDoc.save();
+        window._lastPdfBlob = new Blob([pdfBytes],{type:'application/pdf'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(window._lastPdfBlob);
+        link.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
+        link.click();
+
+        // show DocuSign
+        document.getElementById('btn-docusign').style.display = 'block';
+      });
+
+      // DocuSign stub
+      document.getElementById('btn-docusign').onclick = () => {
+        if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
+        alert('Enviando para DocuSign...');
+      };
     });
   </script>
 </body>
