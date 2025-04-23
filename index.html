@@ -160,43 +160,170 @@
 <body>
   <h2>Cadastro de Verba</h2>
   <form id="form-dossie">
-    <!-- Campos comuns -->
+    <!-- Campos comuns sempre visíveis -->
     <div class="common-fields">
-      <!-- ... (sem alterações) ... -->
+      <div class="row">
+        <div>
+          <label for="rede">Rede</label>
+          <input type="text" id="rede" name="rede">
+        </div>
+        <div>
+          <label for="mercado">Mercado</label>
+          <input type="text" id="mercado" name="mercado">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" name="cidade">
+        </div>
+        <div>
+          <label for="uf">UF</label>
+          <input type="text" id="uf" name="uf" maxlength="2">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="vendedor">Vendedor</label>
+          <input type="text" id="vendedor" name="vendedor">
+        </div>
+        <div>
+          <label for="contrato">Contrato</label>
+          <input type="text" id="contrato" name="contrato">
+        </div>
+      </div>
     </div>
     
-    <!-- Abas -->
+    <!-- Navegação de abas -->
     <ul class="tabs-nav">
-      <!-- ... (sem alterações) ... -->
+      <li class="tab active" data-tab="sell-out">SELL OUT</li>
+      <li class="tab" data-tab="sell-in">SELL IN</li>
+      <li class="tab" data-tab="merchandising">MERCHANDISING</li>
     </ul>
     
-    <!-- SELL OUT -->
+    <!-- Conteúdos das abas -->
     <div class="tab-content active" id="sell-out">
       <h3>Itens - SELL OUT</h3>
       <div id="items-container-sell-out">
-        <!-- ... (template original) ... -->
+        <!-- Template de item para SELL OUT -->
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <input type="text" name="item_familia[]">
+            </div>
+            <div>
+              <label>Produto</label>
+              <input type="text" name="item_produto[]">
+            </div>
+            <div>
+              <label>Unidades</label>
+              <input type="number" step="1" name="item_unidades[]" class="item-unidades">
+            </div>
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="item_verba[]" class="item-verba" readonly>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Bonificação (R$)</label>
+              <input type="number" step="0.01" name="item_bonificacao[]" class="item-bonificacao">
+            </div>
+            <div>
+              <label>TTC (R$)</label>
+              <input type="number" step="0.01" name="item_ttc[]">
+            </div>
+            <div>
+              <label>TTV (R$)</label>
+              <input type="number" step="0.01" name="item_ttv[]">
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-item">Remover item</button>
+          </div>
+        </div>
       </div>
       <button type="button" id="add-item-sell-out">Adicionar item</button>
     </div>
     
-    <!-- SELL IN -->
     <div class="tab-content" id="sell-in">
       <h3>Itens - SELL IN</h3>
       <div id="items-container-sell-in">
-        <!-- ... (template original) ... -->
+        <!-- Template de item para SELL IN -->
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <input type="text" name="item_familia[]">
+            </div>
+            <div>
+              <label>Produto</label>
+              <input type="text" name="item_produto[]">
+            </div>
+            <div>
+              <label>Unidades</label>
+              <input type="number" step="1" name="item_unidades[]" class="item-unidades">
+            </div>
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="item_verba[]" class="item-verba" readonly>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Bonificação (R$)</label>
+              <input type="number" step="0.01" name="item_bonificacao[]" class="item-bonificacao">
+            </div>
+            <div>
+              <label>TTC (R$)</label>
+              <input type="number" step="0.01" name="item_ttc[]">
+            </div>
+            <div>
+              <label>TTV (R$)</label>
+              <input type="number" step="0.01" name="item_ttv[]">
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-item">Remover item</button>
+          </div>
+        </div>
       </div>
       <button type="button" id="add-item-sell-in">Adicionar item</button>
     </div>
     
-    <!-- MERCHANDISING -->
     <div class="tab-content" id="merchandising">
       <h3>Itens - Merchandising</h3>
       <div id="merch-items-container">
-        <!-- ... (template original) ... -->
+        <!-- Template de item para MERCHANDISING -->
+        <div class="merch-item-row">
+          <div class="row">
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="merch_item_verba[]" class="merch-item-verba">
+            </div>
+            <div>
+              <label>Opção Merchandising</label>
+              <select name="merch_item_opcao[]">
+                <option value="">Selecione...</option>
+                <option value="PONTA DE GÔNDOLA">PONTA DE GÔNDOLA</option>
+                <option value="ÁREA FRIA">ÁREA FRIA</option>
+                <option value="PONTO EXTRA">PONTO EXTRA</option>
+              </select>
+            </div>
+            <div>
+              <label>Foto</label>
+              <input type="file" accept="image/*" name="merch_item_photo[]">
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-merch-item">Remover item</button>
+          </div>
+        </div>
       </div>
       <button type="button" id="add-merch-item">Adicionar item</button>
     </div>
-
+    
     <!-- Único campo de upload para o dossiê -->
     <div class="file-upload">
       <label for="dossie_files">Arquivos para o Dossiê (.pdf, .jpg, .png):</label>
@@ -207,7 +334,7 @@
     <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
 
-  <!-- Botão para disparar DocuSign após gerar o PDF -->
+  <!-- Botão DocuSign -->
   <button id="btn-docusign" style="display:none; margin:20px auto; display:block;">
     Enviar para Assinatura (DocuSign)
   </button>
@@ -215,134 +342,185 @@
   <!-- pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    // (mantém todo o JS original de abas, itens e remoções)
+    // --- Sistema de Abas (Tabs) ---
+    const tabs = document.querySelectorAll('.tabs-nav li');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-tab');
+        tabContents.forEach(c => c.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+      });
+    });
 
-    // Função auxiliar: coleta todos os itens de uma aba
+    // --- Itens Dinâmicos SELL IN / SELL OUT ---
+    function updateItemVerba(itemRow) {
+      const bon = itemRow.querySelector('.item-bonificacao');
+      const und = itemRow.querySelector('.item-unidades');
+      const vb = itemRow.querySelector('.item-verba');
+      const val = (parseFloat(bon.value)||0) * (parseFloat(und.value)||0);
+      vb.value = val.toFixed(2);
+    }
+    function addItemListeners(row) {
+      row.querySelector('.item-bonificacao').addEventListener('input', ()=>updateItemVerba(row));
+      row.querySelector('.item-unidades').addEventListener('input', ()=>updateItemVerba(row));
+    }
+    function addRemoveListener(row) {
+      row.querySelector('.remove-item').addEventListener('click', ()=>{
+        const p = row.parentElement;
+        if(p.childElementCount>1) p.removeChild(row);
+        else alert("Você deve ter ao menos um item.");
+      });
+    }
+    // inicializa
+    document.querySelectorAll('#items-container-sell-out .item-row').forEach(r=>{
+      addItemListeners(r); addRemoveListener(r);
+    });
+    document.querySelectorAll('#items-container-sell-in .item-row').forEach(r=>{
+      addItemListeners(r); addRemoveListener(r);
+    });
+    document.getElementById('add-item-sell-out').addEventListener('click', ()=>{
+      const tpl = document.querySelector('#items-container-sell-out .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>i.value='');
+      addItemListeners(nw); addRemoveListener(nw);
+      document.getElementById('items-container-sell-out').appendChild(nw);
+    });
+    document.getElementById('add-item-sell-in').addEventListener('click', ()=>{
+      const tpl = document.querySelector('#items-container-sell-in .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>i.value='');
+      addItemListeners(nw); addRemoveListener(nw);
+      document.getElementById('items-container-sell-in').appendChild(nw);
+    });
+
+    // --- Itens Dinâmicos MERCHANDISING ---
+    function addMerchRemove(row) {
+      row.querySelector('.remove-merch-item').addEventListener('click', ()=>{
+        const p = row.parentElement;
+        if(p.childElementCount>1) p.removeChild(row);
+        else alert("Você deve ter ao menos um item.");
+      });
+    }
+    document.querySelectorAll('#merch-items-container .merch-item-row').forEach(r=>addMerchRemove(r));
+    document.getElementById('add-merch-item').addEventListener('click', ()=>{
+      const tpl = document.querySelector('#merch-items-container .merch-item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>{ if(i.type!=='file') i.value=''; });
+      addMerchRemove(nw);
+      document.getElementById('merch-items-container').appendChild(nw);
+    });
+
+    // --- Coleta itens para PDF ---
     function collectItems(containerId) {
       const rows = document.querySelectorAll(`#${containerId} .item-row, #${containerId} .merch-item-row`);
-      return Array.from(rows).map(row => {
-        const texts = [...row.querySelectorAll('input, select')]
-          .map(el => el.value || '')
+      return Array.from(rows).map(row=>{
+        return Array.from(row.querySelectorAll('input, select'))
+          .map(el=>el.value||'')
           .join(' | ');
-        return texts;
       });
     }
 
-    // Geração do Dossiê em PDF, incluindo itens
-    document.getElementById('form-dossie').addEventListener('submit', async e => {
+    // --- Geração do Dossiê em PDF ---
+    document.getElementById('form-dossie').addEventListener('submit', async e=>{
       e.preventDefault();
-
       const files = document.getElementById('dossie_files').files;
-      if (!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
+      if(!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
 
-      // dados comuns
-      const rede = document.getElementById('rede').value;
-      const mercado = document.getElementById('mercado').value;
-      const cidade = document.getElementById('cidade').value;
-      const uf = document.getElementById('uf').value;
+      // campos comuns
+      const rede     = document.getElementById('rede').value;
+      const mercado  = document.getElementById('mercado').value;
+      const cidade   = document.getElementById('cidade').value;
+      const uf       = document.getElementById('uf').value;
       const vendedor = document.getElementById('vendedor').value;
       const contrato = document.getElementById('contrato').value;
-      const tipoVerba = document.querySelector('.tabs-nav li.active').textContent;
+      const tipo     = document.querySelector('.tabs-nav li.active').textContent;
 
-      // coleta itens por aba
-      const sellOutItems = collectItems('items-container-sell-out');
-      const sellInItems = collectItems('items-container-sell-in');
-      const merchItems   = collectItems('merch-items-container');
+      // itens
+      const sellOut = collectItems('items-container-sell-out');
+      const sellIn  = collectItems('items-container-sell-in');
+      const merch   = collectItems('merch-items-container');
 
-      // cria PDF
       const pdfDoc = await PDFLib.PDFDocument.create();
-      const page = pdfDoc.addPage([595.28, 841.89]);
+      let page = pdfDoc.addPage([595.28,841.89]);
       const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
       let y = 800;
       page.drawText("Dossiê de Verba", { x:50, y, size:24, font });
       y -= 30;
-      // cria tabela simples de campos comuns
-      [
-        `Rede: ${rede}`,
-        `Mercado: ${mercado}`,
-        `Cidade/UF: ${cidade} - ${uf}`,
-        `Vendedor: ${vendedor}`,
-        `Contrato: ${contrato}`,
-        `Tipo de Verba: ${tipoVerba}`,
-        `Data: ${new Date().toLocaleDateString()}`
-      ].forEach(line => {
+
+      [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
+        `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
+        `Data: ${new Date().toLocaleDateString()}` ]
+      .forEach(line=>{
         page.drawText(line, { x:50, y, size:12, font });
         y -= 18;
       });
+      y -= 10;
 
-      // função para desenhar listas de itens
       function drawSection(title, items) {
         page.drawText(title, { x:50, y, size:14, font });
         y -= 20;
-        items.forEach(text => {
-          page.drawText(text, { x:60, y, size:10, font });
+        items.forEach(txt=>{
+          page.drawText(txt, { x:60, y, size:10, font });
           y -= 14;
-          if (y < 50) {
-            // adiciona nova página se necessário
-            y = 800;
-            page = pdfDoc.addPage([595.28, 841.89]);
-          }
         });
         y -= 10;
       }
+      drawSection("SELL OUT:", sellOut);
+      drawSection("SELL IN:", sellIn);
+      drawSection("MERCHANDISING:", merch);
 
-      drawSection("SELL OUT:", sellOutItems);
-      drawSection("SELL IN:",  sellInItems);
-      drawSection("MERCHANDISING:", merchItems);
-
-      // incorpora uploads (pdf e imagens)
-      for (const file of files) {
+      // arquivos
+      for(const file of files) {
         const buf = await file.arrayBuffer();
-        if (file.type.startsWith("image/")) {
-          const img = file.type === "image/png"
+        if(file.type.startsWith("image/")) {
+          const img = file.type==="image/png"
             ? await pdfDoc.embedPng(buf)
             : await pdfDoc.embedJpg(buf);
-          const imgPage = pdfDoc.addPage([595.28, 841.89]);
+          const imgPage = pdfDoc.addPage([595.28,841.89]);
           const { width, height } = imgPage.getSize();
-          const dims = img.scaleToFit(width - 40, height - 40);
-          imgPage.drawImage(img, {
-            x:20, y: height - dims.height - 20,
+          const dims = img.scaleToFit(width-40, height-40);
+          imgPage.drawImage(img,{
+            x:20, y: height-dims.height-20,
             width: dims.width, height: dims.height
           });
-        } else if (file.type === "application/pdf") {
+        } else if(file.type==="application/pdf") {
           const donor = await PDFLib.PDFDocument.load(buf);
           const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copied.forEach(p => pdfDoc.addPage(p));
+          copied.forEach(p=>pdfDoc.addPage(p));
         }
       }
 
-      // gera o blob e mostra botão DocuSign
+      // salva e baixa
       const pdfBytes = await pdfDoc.save();
-      window._lastPdfBlob = new Blob([pdfBytes], { type:'application/pdf' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(window._lastPdfBlob);
-      link.download = `dossie_${tipoVerba.toLowerCase().replace(/ /g,'_')}.pdf`;
-      link.click();
+      window._lastPdfBlob = new Blob([pdfBytes],{type:'application/pdf'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(window._lastPdfBlob);
+      a.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
+      a.click();
 
-      // exibe botão para enviar ao DocuSign
+      // exibe DocuSign
       document.getElementById('btn-docusign').style.display = 'block';
     });
 
-    // stub de integração DocuSign
-    document.getElementById('btn-docusign').addEventListener('click', () => {
-      const blob = window._lastPdfBlob;
-      if (!blob) return alert("Gere primeiro o PDF.");
-      sendToDocuSign(blob);
+    // --- Integração DocuSign (stub) ---
+    document.getElementById('btn-docusign').addEventListener('click', ()=>{
+      if(!window._lastPdfBlob) return alert("Gere primeiro o PDF.");
+      sendToDocuSign(window._lastPdfBlob);
     });
-
-    // Exemplo de função que você deve implementar no seu back-end
     async function sendToDocuSign(pdfBlob) {
       const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Pdf = reader.result.split(',')[1];
-        // Exemplo de chamada (ajuste URL e headers conforme sua API)
-        await fetch('/api/docusign/envelope', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
+      reader.onload = async ()=>{
+        const base64 = reader.result.split(',')[1];
+        await fetch('/api/docusign/envelope',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             name: 'Dossiê de Verba',
-            pdfBase64: base64Pdf,
-            signers: [ /* seu array de signatários */ ]
+            pdfBase64: base64,
+            signers: [ /* defina seus signatários */ ]
           })
         });
         alert('Solicitação de assinatura enviada!');
