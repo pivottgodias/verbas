@@ -131,7 +131,7 @@
     #add-item:hover, #add-merch-item:hover, #add-item-sell-in:hover, #add-item-sell-out:hover {
       background-color: #0056b3;
     }
-    /* Estilização para o campo de upload existente */
+    /* Estilização para o campo de upload */
     .file-upload {
       margin-top: 20px;
       text-align: center;
@@ -144,21 +144,6 @@
     .file-upload input[type="file"] {
       padding: 8px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    /* Novo campo de upload para o dossiê */
-    .file-upload-dossie {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .file-upload-dossie label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      display: block;
-    }
-    .file-upload-dossie input[type="file"] {
-      padding: 8px;
-      border: 1px solid #007BFF;
       border-radius: 4px;
     }
     @media (max-width: 600px) {
@@ -261,7 +246,7 @@
         </div>
       </div>
       <button type="button" id="add-item-sell-out">Adicionar item</button>
-      <!-- Campo de envio de arquivo específico (opcional) -->
+      <!-- Campo de envio de arquivo para SELL OUT -->
       <div class="file-upload">
         <label for="upload_sell_out">Enviar Arquivo:</label>
         <input type="file" id="upload_sell_out" name="upload_sell_out" accept=".xls, .xlsx, .pdf, .jpg, .png">
@@ -312,6 +297,7 @@
         </div>
       </div>
       <button type="button" id="add-item-sell-in">Adicionar item</button>
+      <!-- Campo de envio de arquivo para SELL IN -->
       <div class="file-upload">
         <label for="upload_sell_in">Enviar Arquivo:</label>
         <input type="file" id="upload_sell_in" name="upload_sell_in" accept=".xls, .xlsx, .pdf, .jpg, .png">
@@ -350,8 +336,8 @@
       <button type="button" id="add-merch-item">Adicionar item</button>
     </div>
 
-    <!-- Novo campo para enviar arquivos que entram no dossiê -->
-    <div class="file-upload-dossie">
+    <!-- Novo campo para arquivos do dossiê -->
+    <div class="file-upload">
       <label for="dossie_files">Arquivos para o Dossiê (.pdf, .jpg, .png):</label>
       <input type="file" id="dossie_files" name="dossie_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
     </div>
@@ -461,14 +447,11 @@
     });
 
     // --- Geração automática do Dossiê em PDF ---
-    const form = document.getElementById('form-dossie');
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('form-dossie').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const files = document.getElementById('dossie_files').files;
-      if (!files.length) {
-        return alert("Por favor, selecione ao menos um arquivo para o dossiê.");
-      }
+      if (!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
 
       // Coleta campos comuns
       const rede = document.getElementById('rede').value;
@@ -479,59 +462,45 @@
       const contrato = document.getElementById('contrato').value;
       const tipoVerba = document.querySelector('.tabs-nav li.active').textContent;
 
-      // Cria PDF com pdf-lib
       const pdfDoc = await PDFLib.PDFDocument.create();
       const page = pdfDoc.addPage([595.28, 841.89]); // A4
-      const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
       let y = 800;
-      page.drawText("Dossiê de Verba", { x: 50, y: y, size: 24, font: helvetica });
+      page.drawText("Dossiê de Verba", { x: 50, y, size: 24, font });
       y -= 40;
-      page.drawText(`Rede: ${rede}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Mercado: ${mercado}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Cidade/UF: ${cidade} - ${uf}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Vendedor: ${vendedor}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Contrato: ${contrato}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Tipo de Verba: ${tipoVerba}`, { x: 50, y: y, size: 12, font: helvetica });
-      y -= 20;
-      page.drawText(`Data de Geração: ${new Date().toLocaleDateString()}`, { x: 50, y: y, size: 12, font: helvetica });
+      page.drawText(`Rede: ${rede}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Mercado: ${mercado}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Cidade/UF: ${cidade} - ${uf}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Vendedor: ${vendedor}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Contrato: ${contrato}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Tipo de Verba: ${tipoVerba}`, { x: 50, y, size: 12, font }); y -= 20;
+      page.drawText(`Data: ${new Date().toLocaleDateString()}`, { x: 50, y, size: 12, font });
 
-      // Processa cada arquivo enviado
       for (const file of files) {
-        const arrayBuffer = await file.arrayBuffer();
-
+        const buf = await file.arrayBuffer();
         if (file.type.startsWith("image/")) {
-          // Imagem
-          const image = file.type === "image/png"
-            ? await pdfDoc.embedPng(arrayBuffer)
-            : await pdfDoc.embedJpg(arrayBuffer);
+          const img = file.type === "image/png"
+            ? await pdfDoc.embedPng(buf)
+            : await pdfDoc.embedJpg(buf);
           const imgPage = pdfDoc.addPage([595.28, 841.89]);
           const { width, height } = imgPage.getSize();
-          const dims = image.scaleToFit(width - 40, height - 40);
-          imgPage.drawImage(image, {
-            x: 20,
-            y: height - dims.height - 20,
-            width: dims.width,
-            height: dims.height
+          const dims = img.scaleToFit(width - 40, height - 40);
+          imgPage.drawImage(img, {
+            x: 20, y: height - dims.height - 20,
+            width: dims.width, height: dims.height
           });
         } else if (file.type === "application/pdf") {
-          // PDF existente
-          const donor = await PDFLib.PDFDocument.load(arrayBuffer);
-          const copiedPages = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copiedPages.forEach(p => pdfDoc.addPage(p));
+          const donor = await PDFLib.PDFDocument.load(buf);
+          const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
+          copied.forEach(p => pdfDoc.addPage(p));
         }
       }
 
-      // Salva e baixa o PDF
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `dossie-${tipoVerba.toLowerCase().replace(/ /g, '_')}.pdf`;
+      link.download = `dossie_${tipoVerba.toLowerCase().replace(/ /g,'_')}.pdf`;
       link.click();
     });
   </script>
