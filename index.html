@@ -1,82 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gerador de Dossiê</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    body { font-family: sans-serif; margin: 2rem; background: #f4f4f4; }
-    .container { background: white; padding: 2rem; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    input, select, textarea { width: 100%; padding: 0.5rem; margin-top: 0.3rem; }
-    button { margin-top: 2rem; padding: 1rem; background: #007BFF; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #0056b3; }
-  </style>
 </head>
 <body>
-<div class="container">
-  <h2>Gerador de Dossiê</h2>
-  <form id="dossieForm">
-    <label for="tipo">Tipo de Verba:</label>
-    <select id="tipo" required>
+  <h1>Cadastro de Verba</h1>
+
+  <form id="form-dossie">
+    <label for="tipoVerba">Tipo de Verba:</label>
+    <select id="tipoVerba" name="tipoVerba" required>
+      <option value="">Selecione...</option>
       <option value="SELL IN">SELL IN</option>
       <option value="SELL OUT">SELL OUT</option>
       <option value="MERCHANDISING">MERCHANDISING</option>
-    </select>
+    </select><br><br>
 
-    <label for="empresa">Nome da Empresa:</label>
-    <input type="text" id="empresa" required>
-
-    <label for="valor">Valor Total:</label>
-    <input type="number" id="valor" required>
-
-    <label for="solicitante">Solicitante:</label>
-    <input type="text" id="solicitante" required>
-
-    <label for="obs">Observações:</label>
-    <textarea id="obs" rows="3"></textarea>
-
-    <label for="contrato">Contrato (PDF):</label>
-    <input type="file" id="contrato" accept="application/pdf" required>
-
-    <label for="boleto">Boleto (PDF):</label>
-    <input type="file" id="boleto" accept="application/pdf">
-
-    <label for="memoria">Memória de Cálculo / Foto (PDF ou JPG):</label>
-    <input type="file" id="memoria" accept="application/pdf,image/jpeg">
+    <label for="upload_files">Enviar arquivos (PDFs ou Imagens):</label>
+    <input type="file" id="upload_files" accept=".pdf,.jpg,.jpeg,.png" multiple required /><br><br>
 
     <button type="submit">Gerar Dossiê</button>
   </form>
-</div>
 
-<script>
-  const { jsPDF } = window.jspdf;
+  <!-- jsPDF e pdf-lib -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
-  document.getElementById('dossieForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
+  <script>
+    const form = document.getElementById('form-dossie');
+    const input = document.getElementById('upload_files');
+    const tipoVerba = document.getElementById('tipoVerba');
 
-    const tipo = document.getElementById('tipo').value;
-    const empresa = document.getElementById('empresa').value;
-    const valor = document.getElementById('valor').value;
-    const solicitante = document.getElementById('solicitante').value;
-    const obs = document.getElementById('obs').value;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    const contratoFile = document.getElementById('contrato').files[0];
+      const files = input.files;
+      if (!files.length) return alert("Envie pelo menos um arquivo.");
+      if (!tipoVerba.value) return alert("Selecione o tipo de verba.");
 
-    const doc = new jsPDF();
-    doc.setFontSize(12);
-    doc.text(`Dossiê de Verba`, 20, 20);
-    doc.text(`Tipo: ${tipo}`, 20, 30);
-    doc.text(`Empresa: ${empresa}`, 20, 40);
-    doc.text(`Valor: R$ ${valor}`, 20, 50);
-    doc.text(`Solicitante: ${solicitante}`, 20, 60);
-    doc.text(`Observações:`, 20, 70);
-    doc.text(obs, 20, 80);
+      const { jsPDF } = window.jspdf;
+      const pdfDoc = await PDFLib.PDFDocument.create();
 
-    // Simples export sem juntar PDFs ainda
-    doc.save(`Dossie_${empresa}_${tipo}_${valor}.pdf`);
-  });
-</script>
+      // Capa
+      const page = pdfDoc.addPage([595.28, 841.89]); // A4 em pontos
+      const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const now = new Date().toLocaleDateString();
+      page.drawText("Dossiê de Verba", { x: 50, y: 750, size: 26, font });
+      page.drawText(`Tipo de Verba: ${tipoVerba.value}`, { x: 50, y: 720, size: 16 });
+      page.drawText(`Data de Geração: ${now}`, { x: 50, y: 700, size: 12 });
+
+      // Processa arquivos
+      for (const file of files) {
+        const type = file.type;
+
+        if (type.startsWith("image/")) {
+          const imgBytes = await file.arrayBuffer();
+          try {
+            const image = type.includes("png")
+              ? await pdfDoc.embedPng(imgBytes)
+              : await pdfDoc.embedJpg(imgBytes);
+
+            const imgDims = image.scale(0.5);
+            const imgPage = pdfDoc.addPage([image.width, image.height]);
+            imgPage.drawImage(image, {
+              x: 0,
+              y: 0,
+              width: image.width,
+              height: image.height,
+            });
+          } catch (error) {
+            console.error("Erro ao adicionar imagem:", error);
+          }
+
+        } else if (type === "application/pdf") {
+          const existingPdfBytes = await file.arrayBuffer();
+          const donorPdf = await PDFLib.PDFDocument.load(existingPdfBytes);
+          const copiedPages = await pdfDoc.copyPages(donorPdf, donorPdf.getPageIndices());
+          copiedPages.forEach(p => pdfDoc.addPage(p));
+        }
+      }
+
+      const finalPdf = await pdfDoc.save();
+      const blob = new Blob([finalPdf], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `dossie-${tipoVerba.value.toLowerCase()}.pdf`;
+      link.click();
+    });
+  </script>
 </body>
 </html>
