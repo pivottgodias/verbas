@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Dossiê</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; background: #f4f4f4; }
+    .container { background: white; padding: 2rem; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 0.5rem; margin-top: 0.3rem; }
+    button { margin-top: 2rem; padding: 1rem; background: #007BFF; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Gerador de Dossiê</h2>
+  <form id="dossieForm">
+    <label for="tipo">Tipo de Verba:</label>
+    <select id="tipo" required>
+      <option value="SELL IN">SELL IN</option>
+      <option value="SELL OUT">SELL OUT</option>
+      <option value="MERCHANDISING">MERCHANDISING</option>
+    </select>
+
+    <label for="empresa">Nome da Empresa:</label>
+    <input type="text" id="empresa" required>
+
+    <label for="valor">Valor Total:</label>
+    <input type="number" id="valor" required>
+
+    <label for="solicitante">Solicitante:</label>
+    <input type="text" id="solicitante" required>
+
+    <label for="obs">Observações:</label>
+    <textarea id="obs" rows="3"></textarea>
+
+    <label for="contrato">Contrato (PDF):</label>
+    <input type="file" id="contrato" accept="application/pdf" required>
+
+    <label for="boleto">Boleto (PDF):</label>
+    <input type="file" id="boleto" accept="application/pdf">
+
+    <label for="memoria">Memória de Cálculo / Foto (PDF ou JPG):</label>
+    <input type="file" id="memoria" accept="application/pdf,image/jpeg">
+
+    <button type="submit">Gerar Dossiê</button>
+  </form>
+</div>
+
+<script>
+  const { jsPDF } = window.jspdf;
+
+  document.getElementById('dossieForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const tipo = document.getElementById('tipo').value;
+    const empresa = document.getElementById('empresa').value;
+    const valor = document.getElementById('valor').value;
+    const solicitante = document.getElementById('solicitante').value;
+    const obs = document.getElementById('obs').value;
+
+    const contratoFile = document.getElementById('contrato').files[0];
+
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+    doc.text(`Dossiê de Verba`, 20, 20);
+    doc.text(`Tipo: ${tipo}`, 20, 30);
+    doc.text(`Empresa: ${empresa}`, 20, 40);
+    doc.text(`Valor: R$ ${valor}`, 20, 50);
+    doc.text(`Solicitante: ${solicitante}`, 20, 60);
+    doc.text(`Observações:`, 20, 70);
+    doc.text(obs, 20, 80);
+
+    // Simples export sem juntar PDFs ainda
+    doc.save(`Dossie_${empresa}_${tipo}_${valor}.pdf`);
+  });
+</script>
+</body>
+</html>
