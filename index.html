@@ -1,91 +1,537 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gerador de Dossiê</title>
+  <meta charset="UTF-8">
+  <!-- Meta tag para responsividade -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Verba</title>
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    h2, h3 {
+      text-align: center;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    h2 { background-color: #007BFF; }
+    h3 { background-color: #0056b3; font-size: 20px; }
+    form {
+      background-color: white;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    /* Estilo para os campos comuns */
+    .common-fields .row {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 10px;
+    }
+    .common-fields .row > div { flex: 1; }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    /* Navegação de abas (tabs) */
+    .tabs-nav {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #007BFF;
+    }
+    .tabs-nav li {
+      flex: 1;
+      max-width: 200px;
+      padding: 12px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      text-align: center;
+      cursor: pointer;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .tabs-nav li:hover {
+      background-color: #0056b3;
+      transform: scale(1.03);
+    }
+    .tabs-nav li.active {
+      background-color: #0056b3;
+      transform: scale(1);
+    }
+    /* Conteúdos das abas */
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    /* Estilização para os itens dinâmicos de SELL IN / SELL OUT */
+    .item-row, .merch-item-row {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .item-row .row, .merch-item-row .row {
+      margin-bottom: 10px;
+      display: flex;
+      gap: 30px;
+    }
+    .remove-item, .remove-merch-item {
+      background-color: #dc3545;
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .remove-item:hover, .remove-merch-item:hover {
+      background-color: #c82333;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #218838; }
+    #add-item, #add-merch-item, #add-item-sell-in, #add-item-sell-out {
+      background-color: #007BFF;
+    }
+    #add-item:hover, #add-merch-item:hover, #add-item-sell-in:hover, #add-item-sell-out:hover {
+      background-color: #0056b3;
+    }
+    /* Estilização para o campo de upload existente */
+    .file-upload {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .file-upload label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .file-upload input[type="file"] {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    /* Novo campo de upload para o dossiê */
+    .file-upload-dossie {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .file-upload-dossie label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .file-upload-dossie input[type="file"] {
+      padding: 8px;
+      border: 1px solid #007BFF;
+      border-radius: 4px;
+    }
+    @media (max-width: 600px) {
+      .common-fields .row,
+      .item-row .row,
+      .merch-item-row .row {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .tabs-nav { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Cadastro de Verba</h1>
-
+  <h2>Cadastro de Verba</h2>
   <form id="form-dossie">
-    <label for="tipoVerba">Tipo de Verba:</label>
-    <select id="tipoVerba" name="tipoVerba" required>
-      <option value="">Selecione...</option>
-      <option value="SELL IN">SELL IN</option>
-      <option value="SELL OUT">SELL OUT</option>
-      <option value="MERCHANDISING">MERCHANDISING</option>
-    </select><br><br>
+    <!-- Campos comuns sempre visíveis -->
+    <div class="common-fields">
+      <div class="row">
+        <div>
+          <label for="rede">Rede</label>
+          <input type="text" id="rede" name="rede">
+        </div>
+        <div>
+          <label for="mercado">Mercado</label>
+          <input type="text" id="mercado" name="mercado">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" name="cidade">
+        </div>
+        <div>
+          <label for="uf">UF</label>
+          <input type="text" id="uf" name="uf" maxlength="2">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="vendedor">Vendedor</label>
+          <input type="text" id="vendedor" name="vendedor">
+        </div>
+        <div>
+          <label for="contrato">Contrato</label>
+          <input type="text" id="contrato" name="contrato">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Navegação de abas -->
+    <ul class="tabs-nav">
+      <li class="tab active" data-tab="sell-out">SELL OUT</li>
+      <li class="tab" data-tab="sell-in">SELL IN</li>
+      <li class="tab" data-tab="merchandising">MERCHANDISING</li>
+    </ul>
+    
+    <!-- Conteúdos das abas -->
+    <div class="tab-content active" id="sell-out">
+      <h3>Itens - SELL OUT</h3>
+      <div id="items-container-sell-out">
+        <!-- Template de item para SELL OUT -->
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <input type="text" name="item_familia[]">
+            </div>
+            <div>
+              <label>Produto</label>
+              <input type="text" name="item_produto[]">
+            </div>
+            <div>
+              <label>Unidades</label>
+              <input type="number" step="1" name="item_unidades[]" class="item-unidades">
+            </div>
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="item_verba[]" class="item-verba" readonly>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Bonificação (R$)</label>
+              <input type="number" step="0.01" name="item_bonificacao[]" class="item-bonificacao">
+            </div>
+            <div>
+              <label>TTC (R$)</label>
+              <input type="number" step="0.01" name="item_ttc[]">
+            </div>
+            <div>
+              <label>TTV (R$)</label>
+              <input type="number" step="0.01" name="item_ttv[]">
+            </div>
+            <div></div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-item">Remover item</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="add-item-sell-out">Adicionar item</button>
+      <!-- Campo de envio de arquivo específico (opcional) -->
+      <div class="file-upload">
+        <label for="upload_sell_out">Enviar Arquivo:</label>
+        <input type="file" id="upload_sell_out" name="upload_sell_out" accept=".xls, .xlsx, .pdf, .jpg, .png">
+      </div>
+    </div>
+    
+    <div class="tab-content" id="sell-in">
+      <h3>Itens - SELL IN</h3>
+      <div id="items-container-sell-in">
+        <!-- Template de item para SELL IN -->
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <input type="text" name="item_familia[]">
+            </div>
+            <div>
+              <label>Produto</label>
+              <input type="text" name="item_produto[]">
+            </div>
+            <div>
+              <label>Unidades</label>
+              <input type="number" step="1" name="item_unidades[]" class="item-unidades">
+            </div>
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="item_verba[]" class="item-verba" readonly>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Bonificação (R$)</label>
+              <input type="number" step="0.01" name="item_bonificacao[]" class="item-bonificacao">
+            </div>
+            <div>
+              <label>TTC (R$)</label>
+              <input type="number" step="0.01" name="item_ttc[]">
+            </div>
+            <div>
+              <label>TTV (R$)</label>
+              <input type="number" step="0.01" name="item_ttv[]">
+            </div>
+            <div></div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-item">Remover item</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="add-item-sell-in">Adicionar item</button>
+      <div class="file-upload">
+        <label for="upload_sell_in">Enviar Arquivo:</label>
+        <input type="file" id="upload_sell_in" name="upload_sell_in" accept=".xls, .xlsx, .pdf, .jpg, .png">
+      </div>
+    </div>
+    
+    <div class="tab-content" id="merchandising">
+      <h3>Itens - Merchandising</h3>
+      <div id="merch-items-container">
+        <!-- Template de item para MERCHANDISING -->
+        <div class="merch-item-row">
+          <div class="row">
+            <div>
+              <label>Verba (R$)</label>
+              <input type="number" step="0.01" name="merch_item_verba[]" class="merch-item-verba">
+            </div>
+            <div>
+              <label>Opção Merchandising</label>
+              <select name="merch_item_opcao[]">
+                <option value="">Selecione...</option>
+                <option value="PONTA DE GÔNDOLA">PONTA DE GÔNDOLA</option>
+                <option value="ÁREA FRIA">ÁREA FRIA</option>
+                <option value="PONTO EXTRA">PONTO EXTRA</option>
+              </select>
+            </div>
+            <div>
+              <label>Foto</label>
+              <input type="file" accept="image/*" name="merch_item_photo[]">
+            </div>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" class="remove-merch-item">Remover item</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="add-merch-item">Adicionar item</button>
+    </div>
 
-    <label for="upload_files">Enviar arquivos (PDFs ou Imagens):</label>
-    <input type="file" id="upload_files" accept=".pdf,.jpg,.jpeg,.png" multiple required /><br><br>
+    <!-- Novo campo para enviar arquivos que entram no dossiê -->
+    <div class="file-upload-dossie">
+      <label for="dossie_files">Arquivos para o Dossiê (.pdf, .jpg, .png):</label>
+      <input type="file" id="dossie_files" name="dossie_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
+    </div>
 
-    <button type="submit">Gerar Dossiê</button>
+    <br><br>
+    <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
-
-  <!-- jsPDF e pdf-lib -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <!-- Biblioteca para manipulação de PDF -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-
   <script>
-    const form = document.getElementById('form-dossie');
-    const input = document.getElementById('upload_files');
-    const tipoVerba = document.getElementById('tipoVerba');
+    // --- Sistema de Abas (Tabs) ---
+    const tabs = document.querySelectorAll('.tabs-nav li');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-tab');
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+      });
+    });
+    
+    // --- Funções para itens de SELL IN / SELL OUT ---
+    function updateItemVerba(itemRow) {
+      const bonInput = itemRow.querySelector('.item-bonificacao');
+      const unidInput = itemRow.querySelector('.item-unidades');
+      const verbaInput = itemRow.querySelector('.item-verba');
+      const bonValue = parseFloat(bonInput.value) || 0;
+      const unidValue = parseFloat(unidInput.value) || 0;
+      verbaInput.value = (bonValue * unidValue).toFixed(2);
+    }
+    
+    function addItemListeners(itemRow) {
+      const bonInput = itemRow.querySelector('.item-bonificacao');
+      const unidInput = itemRow.querySelector('.item-unidades');
+      bonInput.addEventListener('input', () => updateItemVerba(itemRow));
+      unidInput.addEventListener('input', () => updateItemVerba(itemRow));
+    }
+    
+    function addRemoveListener(itemRow) {
+      const removeButton = itemRow.querySelector('.remove-item');
+      removeButton.addEventListener('click', () => {
+        const parent = itemRow.parentElement;
+        if (parent.childElementCount > 1) {
+          parent.removeChild(itemRow);
+        } else {
+          alert("Você deve ter ao menos um item.");
+        }
+      });
+    }
+    
+    document.querySelectorAll('#items-container-sell-out .item-row').forEach(row => {
+      addItemListeners(row);
+      addRemoveListener(row);
+    });
+    document.querySelectorAll('#items-container-sell-in .item-row').forEach(row => {
+      addItemListeners(row);
+      addRemoveListener(row);
+    });
+    
+    document.getElementById('add-item-sell-out').addEventListener('click', () => {
+      const template = document.querySelector('#items-container-sell-out .item-row');
+      const newItem = template.cloneNode(true);
+      newItem.querySelectorAll('input').forEach(input => input.value = '');
+      addItemListeners(newItem);
+      addRemoveListener(newItem);
+      document.getElementById('items-container-sell-out').appendChild(newItem);
+    });
+    
+    document.getElementById('add-item-sell-in').addEventListener('click', () => {
+      const template = document.querySelector('#items-container-sell-in .item-row');
+      const newItem = template.cloneNode(true);
+      newItem.querySelectorAll('input').forEach(input => input.value = '');
+      addItemListeners(newItem);
+      addRemoveListener(newItem);
+      document.getElementById('items-container-sell-in').appendChild(newItem);
+    });
+    
+    // --- Funções para itens de MERCHANDISING ---
+    function addMerchRemoveListener(itemRow) {
+      const removeButton = itemRow.querySelector('.remove-merch-item');
+      removeButton.addEventListener('click', () => {
+        const parent = itemRow.parentElement;
+        if (parent.childElementCount > 1) {
+          parent.removeChild(itemRow);
+        } else {
+          alert("Você deve ter ao menos um item.");
+        }
+      });
+    }
+    
+    document.querySelectorAll('#merch-items-container .merch-item-row').forEach(row => {
+      addMerchRemoveListener(row);
+    });
+    
+    document.getElementById('add-merch-item').addEventListener('click', () => {
+      const template = document.querySelector('#merch-items-container .merch-item-row');
+      const newItem = template.cloneNode(true);
+      newItem.querySelectorAll('input').forEach(input => {
+        if (input.type !== "file") input.value = '';
+      });
+      addMerchRemoveListener(newItem);
+      document.getElementById('merch-items-container').appendChild(newItem);
+    });
 
+    // --- Geração automática do Dossiê em PDF ---
+    const form = document.getElementById('form-dossie');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const files = input.files;
-      if (!files.length) return alert("Envie pelo menos um arquivo.");
-      if (!tipoVerba.value) return alert("Selecione o tipo de verba.");
+      const files = document.getElementById('dossie_files').files;
+      if (!files.length) {
+        return alert("Por favor, selecione ao menos um arquivo para o dossiê.");
+      }
 
-      const { jsPDF } = window.jspdf;
+      // Coleta campos comuns
+      const rede = document.getElementById('rede').value;
+      const mercado = document.getElementById('mercado').value;
+      const cidade = document.getElementById('cidade').value;
+      const uf = document.getElementById('uf').value;
+      const vendedor = document.getElementById('vendedor').value;
+      const contrato = document.getElementById('contrato').value;
+      const tipoVerba = document.querySelector('.tabs-nav li.active').textContent;
+
+      // Cria PDF com pdf-lib
       const pdfDoc = await PDFLib.PDFDocument.create();
+      const page = pdfDoc.addPage([595.28, 841.89]); // A4
+      const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      let y = 800;
+      page.drawText("Dossiê de Verba", { x: 50, y: y, size: 24, font: helvetica });
+      y -= 40;
+      page.drawText(`Rede: ${rede}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Mercado: ${mercado}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Cidade/UF: ${cidade} - ${uf}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Vendedor: ${vendedor}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Contrato: ${contrato}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Tipo de Verba: ${tipoVerba}`, { x: 50, y: y, size: 12, font: helvetica });
+      y -= 20;
+      page.drawText(`Data de Geração: ${new Date().toLocaleDateString()}`, { x: 50, y: y, size: 12, font: helvetica });
 
-      // Capa
-      const page = pdfDoc.addPage([595.28, 841.89]); // A4 em pontos
-      const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-      const now = new Date().toLocaleDateString();
-      page.drawText("Dossiê de Verba", { x: 50, y: 750, size: 26, font });
-      page.drawText(`Tipo de Verba: ${tipoVerba.value}`, { x: 50, y: 720, size: 16 });
-      page.drawText(`Data de Geração: ${now}`, { x: 50, y: 700, size: 12 });
-
-      // Processa arquivos
+      // Processa cada arquivo enviado
       for (const file of files) {
-        const type = file.type;
+        const arrayBuffer = await file.arrayBuffer();
 
-        if (type.startsWith("image/")) {
-          const imgBytes = await file.arrayBuffer();
-          try {
-            const image = type.includes("png")
-              ? await pdfDoc.embedPng(imgBytes)
-              : await pdfDoc.embedJpg(imgBytes);
-
-            const imgDims = image.scale(0.5);
-            const imgPage = pdfDoc.addPage([image.width, image.height]);
-            imgPage.drawImage(image, {
-              x: 0,
-              y: 0,
-              width: image.width,
-              height: image.height,
-            });
-          } catch (error) {
-            console.error("Erro ao adicionar imagem:", error);
-          }
-
-        } else if (type === "application/pdf") {
-          const existingPdfBytes = await file.arrayBuffer();
-          const donorPdf = await PDFLib.PDFDocument.load(existingPdfBytes);
-          const copiedPages = await pdfDoc.copyPages(donorPdf, donorPdf.getPageIndices());
+        if (file.type.startsWith("image/")) {
+          // Imagem
+          const image = file.type === "image/png"
+            ? await pdfDoc.embedPng(arrayBuffer)
+            : await pdfDoc.embedJpg(arrayBuffer);
+          const imgPage = pdfDoc.addPage([595.28, 841.89]);
+          const { width, height } = imgPage.getSize();
+          const dims = image.scaleToFit(width - 40, height - 40);
+          imgPage.drawImage(image, {
+            x: 20,
+            y: height - dims.height - 20,
+            width: dims.width,
+            height: dims.height
+          });
+        } else if (file.type === "application/pdf") {
+          // PDF existente
+          const donor = await PDFLib.PDFDocument.load(arrayBuffer);
+          const copiedPages = await pdfDoc.copyPages(donor, donor.getPageIndices());
           copiedPages.forEach(p => pdfDoc.addPage(p));
         }
       }
 
-      const finalPdf = await pdfDoc.save();
-      const blob = new Blob([finalPdf], { type: 'application/pdf' });
+      // Salva e baixa o PDF
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `dossie-${tipoVerba.value.toLowerCase()}.pdf`;
+      link.download = `dossie-${tipoVerba.toLowerCase().replace(/ /g, '_')}.pdf`;
       link.click();
     });
   </script>
