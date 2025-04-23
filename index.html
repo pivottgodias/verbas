@@ -125,13 +125,13 @@
       cursor: pointer;
     }
     button:hover { background-color: #218838; }
-    #add-item, #add-merch-item, #add-item-sell-in, #add-item-sell-out {
+    #add-item-sell-out, #add-item-sell-in, #add-merch-item {
       background-color: #007BFF;
     }
-    #add-item:hover, #add-merch-item:hover, #add-item-sell-in:hover, #add-item-sell-out:hover {
+    #add-item-sell-out:hover, #add-item-sell-in:hover, #add-merch-item:hover {
       background-color: #0056b3;
     }
-    /* Estilização para o campo de upload */
+    /* Estilização para o campo de upload unificado */
     .file-upload {
       margin-top: 20px;
       text-align: center;
@@ -159,6 +159,7 @@
 </head>
 <body>
   <h2>Cadastro de Verba</h2>
+
   <form id="form-dossie">
     <!-- Campos comuns sempre visíveis -->
     <div class="common-fields">
@@ -334,15 +335,15 @@
     <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
 
-  <!-- Botão DocuSign -->
+  <!-- Botão DocuSign (inicialmente oculto) -->
   <button id="btn-docusign" style="display:none; margin:20px auto; display:block;">
     Enviar para Assinatura (DocuSign)
   </button>
 
-  <!-- pdf-lib -->
+  <!-- Biblioteca pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    // --- Sistema de Abas (Tabs) ---
+    // --- Abas ---
     const tabs = document.querySelectorAll('.tabs-nav li');
     const tabContents = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => {
@@ -355,79 +356,75 @@
       });
     });
 
-    // --- Itens Dinâmicos SELL IN / SELL OUT ---
-    function updateItemVerba(itemRow) {
-      const bon = itemRow.querySelector('.item-bonificacao');
-      const und = itemRow.querySelector('.item-unidades');
-      const vb = itemRow.querySelector('.item-verba');
-      const val = (parseFloat(bon.value)||0) * (parseFloat(und.value)||0);
-      vb.value = val.toFixed(2);
+    // --- Itens Dinâmicos SELL OUT / SELL IN ---
+    function updateItemVerba(row) {
+      const bon = row.querySelector('.item-bonificacao');
+      const und = row.querySelector('.item-unidades');
+      const vb  = row.querySelector('.item-verba');
+      vb.value = ((parseFloat(bon.value)||0) * (parseFloat(und.value)||0)).toFixed(2);
     }
-    function addItemListeners(row) {
-      row.querySelector('.item-bonificacao').addEventListener('input', ()=>updateItemVerba(row));
-      row.querySelector('.item-unidades').addEventListener('input', ()=>updateItemVerba(row));
-    }
-    function addRemoveListener(row) {
-      row.querySelector('.remove-item').addEventListener('click', ()=>{
+    function initItemRow(row) {
+      addListeners(row, '.item-bonificacao');
+      addListeners(row, '.item-unidades');
+      row.querySelector('.remove-item').addEventListener('click', () => {
         const p = row.parentElement;
-        if(p.childElementCount>1) p.removeChild(row);
+        if (p.childElementCount > 1) p.removeChild(row);
         else alert("Você deve ter ao menos um item.");
       });
     }
-    // inicializa
-    document.querySelectorAll('#items-container-sell-out .item-row').forEach(r=>{
-      addItemListeners(r); addRemoveListener(r);
-    });
-    document.querySelectorAll('#items-container-sell-in .item-row').forEach(r=>{
-      addItemListeners(r); addRemoveListener(r);
-    });
-    document.getElementById('add-item-sell-out').addEventListener('click', ()=>{
+    function addListeners(row, selector) {
+      row.querySelector(selector).addEventListener('input', () => updateItemVerba(row));
+    }
+    document.querySelectorAll('#items-container-sell-out .item-row').forEach(initItemRow);
+    document.querySelectorAll('#items-container-sell-in .item-row').forEach(initItemRow);
+    document.getElementById('add-item-sell-out').addEventListener('click', () => {
       const tpl = document.querySelector('#items-container-sell-out .item-row');
       const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>i.value='');
-      addItemListeners(nw); addRemoveListener(nw);
+      nw.querySelectorAll('input').forEach(i => i.value='');
+      initItemRow(nw);
       document.getElementById('items-container-sell-out').appendChild(nw);
     });
-    document.getElementById('add-item-sell-in').addEventListener('click', ()=>{
+    document.getElementById('add-item-sell-in').addEventListener('click', () => {
       const tpl = document.querySelector('#items-container-sell-in .item-row');
       const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>i.value='');
-      addItemListeners(nw); addRemoveListener(nw);
+      nw.querySelectorAll('input').forEach(i => i.value='');
+      initItemRow(nw);
       document.getElementById('items-container-sell-in').appendChild(nw);
     });
 
     // --- Itens Dinâmicos MERCHANDISING ---
-    function addMerchRemove(row) {
-      row.querySelector('.remove-merch-item').addEventListener('click', ()=>{
+    function initMerchRow(row) {
+      row.querySelector('.remove-merch-item').addEventListener('click', () => {
         const p = row.parentElement;
-        if(p.childElementCount>1) p.removeChild(row);
+        if (p.childElementCount > 1) p.removeChild(row);
         else alert("Você deve ter ao menos um item.");
       });
     }
-    document.querySelectorAll('#merch-items-container .merch-item-row').forEach(r=>addMerchRemove(r));
-    document.getElementById('add-merch-item').addEventListener('click', ()=>{
+    document.querySelectorAll('#merch-items-container .merch-item-row').forEach(initMerchRow);
+    document.getElementById('add-merch-item').addEventListener('click', () => {
       const tpl = document.querySelector('#merch-items-container .merch-item-row');
       const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>{ if(i.type!=='file') i.value=''; });
-      addMerchRemove(nw);
+      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = '' });
+      initMerchRow(nw);
       document.getElementById('merch-items-container').appendChild(nw);
     });
 
-    // --- Coleta itens para PDF ---
+    // --- Coleta itens ---
     function collectItems(containerId) {
-      const rows = document.querySelectorAll(`#${containerId} .item-row, #${containerId} .merch-item-row`);
-      return Array.from(rows).map(row=>{
-        return Array.from(row.querySelectorAll('input, select'))
-          .map(el=>el.value||'')
-          .join(' | ');
-      });
+      return Array.from(
+        document.querySelectorAll(`#${containerId} .item-row, #${containerId} .merch-item-row`)
+      ).map(row =>
+        Array.from(row.querySelectorAll('input, select'))
+          .map(el => el.value || '')
+          .join(' | ')
+      );
     }
 
-    // --- Geração do Dossiê em PDF ---
-    document.getElementById('form-dossie').addEventListener('submit', async e=>{
+    // --- Gera PDF e mostra DocuSign ---
+    document.getElementById('form-dossie').addEventListener('submit', async e => {
       e.preventDefault();
       const files = document.getElementById('dossie_files').files;
-      if(!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
+      if (!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
 
       // campos comuns
       const rede     = document.getElementById('rede').value;
@@ -444,27 +441,32 @@
       const merch   = collectItems('merch-items-container');
 
       const pdfDoc = await PDFLib.PDFDocument.create();
-      let page = pdfDoc.addPage([595.28,841.89]);
+      let page = pdfDoc.addPage([595.28, 841.89]);
       const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
       let y = 800;
+
+      // capa
       page.drawText("Dossiê de Verba", { x:50, y, size:24, font });
       y -= 30;
-
       [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
         `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
         `Data: ${new Date().toLocaleDateString()}` ]
-      .forEach(line=>{
-        page.drawText(line, { x:50, y, size:12, font });
-        y -= 18;
-      });
+        .forEach(line => {
+          page.drawText(line, { x:50, y, size:12, font });
+          y -= 18;
+        });
       y -= 10;
 
       function drawSection(title, items) {
         page.drawText(title, { x:50, y, size:14, font });
         y -= 20;
-        items.forEach(txt=>{
+        items.forEach(txt => {
           page.drawText(txt, { x:60, y, size:10, font });
           y -= 14;
+          if (y < 50) {
+            page = pdfDoc.addPage([595.28, 841.89]);
+            y = 800;
+          }
         });
         y -= 10;
       }
@@ -472,55 +474,53 @@
       drawSection("SELL IN:", sellIn);
       drawSection("MERCHANDISING:", merch);
 
-      // arquivos
-      for(const file of files) {
+      // anexos
+      for (const file of files) {
         const buf = await file.arrayBuffer();
-        if(file.type.startsWith("image/")) {
-          const img = file.type==="image/png"
+        if (file.type.startsWith("image/")) {
+          const img = file.type === "image/png"
             ? await pdfDoc.embedPng(buf)
             : await pdfDoc.embedJpg(buf);
-          const imgPage = pdfDoc.addPage([595.28,841.89]);
+          const imgPage = pdfDoc.addPage([595.28, 841.89]);
           const { width, height } = imgPage.getSize();
-          const dims = img.scaleToFit(width-40, height-40);
-          imgPage.drawImage(img,{
-            x:20, y: height-dims.height-20,
-            width: dims.width, height: dims.height
-          });
-        } else if(file.type==="application/pdf") {
+          const dims = img.scaleToFit(width - 40, height - 40);
+          imgPage.drawImage(img, { x:20, y: height - dims.height -20,
+                                   width: dims.width, height: dims.height });
+        } else if (file.type === "application/pdf") {
           const donor = await PDFLib.PDFDocument.load(buf);
           const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copied.forEach(p=>pdfDoc.addPage(p));
+          copied.forEach(p => pdfDoc.addPage(p));
         }
       }
 
       // salva e baixa
       const pdfBytes = await pdfDoc.save();
-      window._lastPdfBlob = new Blob([pdfBytes],{type:'application/pdf'});
+      window._lastPdfBlob = new Blob([pdfBytes], { type:'application/pdf' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(window._lastPdfBlob);
       a.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
       a.click();
 
-      // exibe DocuSign
+      // mostra botão DocuSign
       document.getElementById('btn-docusign').style.display = 'block';
     });
 
-    // --- Integração DocuSign (stub) ---
-    document.getElementById('btn-docusign').addEventListener('click', ()=>{
-      if(!window._lastPdfBlob) return alert("Gere primeiro o PDF.");
+    // --- DocuSign stub ---
+    document.getElementById('btn-docusign').addEventListener('click', () => {
+      if (!window._lastPdfBlob) return alert("Gere primeiro o PDF.");
       sendToDocuSign(window._lastPdfBlob);
     });
     async function sendToDocuSign(pdfBlob) {
       const reader = new FileReader();
-      reader.onload = async ()=>{
+      reader.onload = async () => {
         const base64 = reader.result.split(',')[1];
-        await fetch('/api/docusign/envelope',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+        await fetch('/api/docusign/envelope', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
           body: JSON.stringify({
             name: 'Dossiê de Verba',
             pdfBase64: base64,
-            signers: [ /* defina seus signatários */ ]
+            signers: [ /* defina seus signatários aqui */ ]
           })
         });
         alert('Solicitação de assinatura enviada!');
