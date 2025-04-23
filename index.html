@@ -7,122 +7,50 @@
   <title>Cadastro de Verba</title>
   <style>
     /* Reset básico */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f8f9fa;
-    }
-    h2, h3 {
-      text-align: center;
-      color: white;
-      padding: 15px;
-      border-radius: 5px;
-      margin: 20px 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+    h2, h3 { text-align: center; color: white; padding: 15px; border-radius: 5px; margin: 20px 0; }
     h2 { background-color: #007BFF; }
     h3 { background-color: #0056b3; font-size: 20px; }
     form {
-      background-color: white;
-      padding: 25px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 900px;
-      margin: auto;
+      background-color: white; padding: 25px; border-radius: 8px;
+      width: 90%; max-width: 900px; margin: auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    /* Estilo para os campos comuns */
-    .common-fields .row {
-      display: flex;
-      gap: 30px;
-      margin-bottom: 10px;
-    }
+    .common-fields .row { display: flex; gap: 30px; margin-bottom: 10px; }
     .common-fields .row > div { flex: 1; }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    label { display: block; margin-top: 10px; font-weight: bold; }
     input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      width: 100%; padding: 8px; margin-top: 4px;
+      border: 1px solid #ccc; border-radius: 4px;
     }
-    /* Navegação de abas (tabs) */
     .tabs-nav {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #007BFF;
+      list-style: none; display: flex; justify-content: center;
+      gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #007BFF;
     }
     .tabs-nav li {
-      flex: 1;
-      max-width: 200px;
-      padding: 12px 20px;
-      background-color: #007BFF;
-      color: #fff;
-      text-align: center;
-      cursor: pointer;
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
+      flex: 1; max-width: 200px; padding: 12px 20px;
+      background-color: #007BFF; color: #fff; text-align: center;
+      cursor: pointer; border-top-left-radius: 5px; border-top-right-radius: 5px;
       transition: background-color 0.3s ease, transform 0.3s ease;
     }
-    .tabs-nav li:hover {
-      background-color: #0056b3;
-      transform: scale(1.03);
-    }
-    .tabs-nav li.active {
-      background-color: #0056b3;
-      transform: scale(1);
-    }
-    /* Conteúdos das abas */
-    .tab-content {
-      display: none;
-      padding: 20px 0;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    /* Estilização para os itens dinâmicos de SELL IN / SELL OUT */
+    .tabs-nav li:hover { background-color: #0056b3; transform: scale(1.03); }
+    .tabs-nav li.active { background-color: #0056b3; transform: scale(1); }
+    .tab-content { display: none; padding: 20px 0; }
+    .tab-content.active { display: block; }
     .item-row, .merch-item-row {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 4px;
-      margin-bottom: 10px;
+      border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px;
     }
-    .item-row .row, .merch-item-row .row {
-      margin-bottom: 10px;
-      display: flex;
-      gap: 30px;
-    }
+    .item-row .row, .merch-item-row .row { display: flex; gap: 30px; margin-bottom: 10px; }
     .remove-item, .remove-merch-item {
-      background-color: #dc3545;
-      border: none;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
+      background-color: #dc3545; border: none; color: #fff;
+      padding: 6px 12px; border-radius: 4px; cursor: pointer;
     }
-    .remove-item:hover, .remove-merch-item:hover {
-      background-color: #c82333;
-    }
+    .remove-item:hover, .remove-merch-item:hover { background-color: #c82333; }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
+      margin-top: 20px; padding: 10px 20px;
+      background-color: #28a745; color: white; border: none;
+      border-radius: 4px; font-size: 16px; cursor: pointer;
     }
     button:hover { background-color: #218838; }
     #add-item-sell-out, #add-item-sell-in, #add-merch-item {
@@ -131,37 +59,27 @@
     #add-item-sell-out:hover, #add-item-sell-in:hover, #add-merch-item:hover {
       background-color: #0056b3;
     }
-    /* Estilização para o campo de upload unificado */
     .file-upload {
-      margin-top: 20px;
-      text-align: center;
+      margin-top: 20px; text-align: center;
     }
-    .file-upload label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      display: block;
-    }
+    .file-upload label { font-weight: bold; margin-bottom: 8px; display: block; }
     .file-upload input[type="file"] {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 8px; border: 1px solid #ccc; border-radius: 4px;
     }
     @media (max-width: 600px) {
-      .common-fields .row,
-      .item-row .row,
-      .merch-item-row .row {
-        flex-direction: column;
-        gap: 15px;
+      .common-fields .row, .item-row .row, .merch-item-row .row {
+        flex-direction: column; gap: 15px;
       }
       .tabs-nav { flex-direction: column; }
     }
   </style>
 </head>
 <body>
+
   <h2>Cadastro de Verba</h2>
 
   <form id="form-dossie">
-    <!-- Campos comuns sempre visíveis -->
+    <!-- Campos comuns -->
     <div class="common-fields">
       <div class="row">
         <div>
@@ -194,19 +112,18 @@
         </div>
       </div>
     </div>
-    
-    <!-- Navegação de abas -->
+
+    <!-- Abas -->
     <ul class="tabs-nav">
       <li class="tab active" data-tab="sell-out">SELL OUT</li>
       <li class="tab" data-tab="sell-in">SELL IN</li>
       <li class="tab" data-tab="merchandising">MERCHANDISING</li>
     </ul>
-    
-    <!-- Conteúdos das abas -->
+
+    <!-- SELL OUT -->
     <div class="tab-content active" id="sell-out">
       <h3>Itens - SELL OUT</h3>
       <div id="items-container-sell-out">
-        <!-- Template de item para SELL OUT -->
         <div class="item-row">
           <div class="row">
             <div>
@@ -247,11 +164,11 @@
       </div>
       <button type="button" id="add-item-sell-out">Adicionar item</button>
     </div>
-    
+
+    <!-- SELL IN -->
     <div class="tab-content" id="sell-in">
       <h3>Itens - SELL IN</h3>
       <div id="items-container-sell-in">
-        <!-- Template de item para SELL IN -->
         <div class="item-row">
           <div class="row">
             <div>
@@ -292,11 +209,11 @@
       </div>
       <button type="button" id="add-item-sell-in">Adicionar item</button>
     </div>
-    
+
+    <!-- MERCHANDISING -->
     <div class="tab-content" id="merchandising">
       <h3>Itens - Merchandising</h3>
       <div id="merch-items-container">
-        <!-- Template de item para MERCHANDISING -->
         <div class="merch-item-row">
           <div class="row">
             <div>
@@ -313,7 +230,7 @@
               </select>
             </div>
             <div>
-              <label>Foto</label>
+              <label>Foto (não entra na tabela)</label>
               <input type="file" accept="image/*" name="merch_item_photo[]">
             </div>
           </div>
@@ -324,8 +241,8 @@
       </div>
       <button type="button" id="add-merch-item">Adicionar item</button>
     </div>
-    
-    <!-- Único campo de upload para o dossiê -->
+
+    <!-- Upload unificado -->
     <div class="file-upload">
       <label for="dossie_files">Arquivos para o Dossiê (.pdf, .jpg, .png):</label>
       <input type="file" id="dossie_files" name="dossie_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
@@ -335,98 +252,138 @@
     <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
 
-  <!-- Botão DocuSign (inicialmente oculto) -->
+  <!-- DocuSign -->
   <button id="btn-docusign" style="display:none; margin:20px auto; display:block;">
     Enviar para Assinatura (DocuSign)
   </button>
 
-  <!-- Biblioteca pdf-lib -->
+  <!-- pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    // --- Abas ---
+    // abas
     const tabs = document.querySelectorAll('.tabs-nav li');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const target = tab.getAttribute('data-tab');
-        tabContents.forEach(c => c.classList.remove('active'));
-        document.getElementById(target).classList.add('active');
-      });
-    });
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      contents.forEach(c=>c.classList.remove('active'));
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    }));
 
-    // --- Itens Dinâmicos SELL OUT / SELL IN ---
-    function updateItemVerba(row) {
-      const bon = row.querySelector('.item-bonificacao');
-      const und = row.querySelector('.item-unidades');
-      const vb  = row.querySelector('.item-verba');
-      vb.value = ((parseFloat(bon.value)||0) * (parseFloat(und.value)||0)).toFixed(2);
-    }
-    function initItemRow(row) {
-      addListeners(row, '.item-bonificacao');
-      addListeners(row, '.item-unidades');
-      row.querySelector('.remove-item').addEventListener('click', () => {
-        const p = row.parentElement;
-        if (p.childElementCount > 1) p.removeChild(row);
-        else alert("Você deve ter ao menos um item.");
+    // init dynamic rows
+    function initRow(container, selector, isMerch=false) {
+      document.querySelectorAll(container + ' ' + selector).forEach(row=>{
+        if (!isMerch) {
+          ['.item-bonificacao','.item-unidades'].forEach(sel=>
+            row.querySelector(sel).addEventListener('input', ()=>{
+              const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
+              const und = parseFloat(row.querySelector('.item-unidades').value)||0;
+              row.querySelector('.item-verba').value = (bon*und).toFixed(2);
+            })
+          );
+          row.querySelector('.remove-item').addEventListener('click', ()=>{
+            const p=row.parentElement;
+            if(p.childElementCount>1) p.removeChild(row);
+            else alert('Ao menos um item.');
+          });
+        } else {
+          row.querySelector('.remove-merch-item').addEventListener('click', ()=>{
+            const p=row.parentElement;
+            if(p.childElementCount>1) p.removeChild(row);
+            else alert('Ao menos um item.');
+          });
+        }
       });
     }
-    function addListeners(row, selector) {
-      row.querySelector(selector).addEventListener('input', () => updateItemVerba(row));
-    }
-    document.querySelectorAll('#items-container-sell-out .item-row').forEach(initItemRow);
-    document.querySelectorAll('#items-container-sell-in .item-row').forEach(initItemRow);
-    document.getElementById('add-item-sell-out').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-out .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value='');
-      initItemRow(nw);
+    initRow('#items-container-sell-out','.item-row');
+    initRow('#items-container-sell-in','.item-row');
+    initRow('#merch-items-container','.merch-item-row',true);
+
+    document.getElementById('add-item-sell-out').addEventListener('click', ()=>{
+      const tpl=document.querySelector('#items-container-sell-out .item-row');
+      const nw=tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>i.value='');
       document.getElementById('items-container-sell-out').appendChild(nw);
+      initRow('#items-container-sell-out','.item-row');
     });
-    document.getElementById('add-item-sell-in').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-in .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value='');
-      initItemRow(nw);
+    document.getElementById('add-item-sell-in').addEventListener('click', ()=>{
+      const tpl=document.querySelector('#items-container-sell-in .item-row');
+      const nw=tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>i.value='');
       document.getElementById('items-container-sell-in').appendChild(nw);
+      initRow('#items-container-sell-in','.item-row');
     });
-
-    // --- Itens Dinâmicos MERCHANDISING ---
-    function initMerchRow(row) {
-      row.querySelector('.remove-merch-item').addEventListener('click', () => {
-        const p = row.parentElement;
-        if (p.childElementCount > 1) p.removeChild(row);
-        else alert("Você deve ter ao menos um item.");
-      });
-    }
-    document.querySelectorAll('#merch-items-container .merch-item-row').forEach(initMerchRow);
-    document.getElementById('add-merch-item').addEventListener('click', () => {
-      const tpl = document.querySelector('#merch-items-container .merch-item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = '' });
-      initMerchRow(nw);
+    document.getElementById('add-merch-item').addEventListener('click', ()=>{
+      const tpl=document.querySelector('#merch-items-container .merch-item-row');
+      const nw=tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i=>{ if(i.type!=='file') i.value=''; });
       document.getElementById('merch-items-container').appendChild(nw);
+      initRow('#merch-items-container','.merch-item-row',true);
     });
 
-    // --- Coleta itens ---
-    function collectItems(containerId) {
-      return Array.from(
-        document.querySelectorAll(`#${containerId} .item-row, #${containerId} .merch-item-row`)
-      ).map(row =>
-        Array.from(row.querySelectorAll('input, select'))
-          .map(el => el.value || '')
-          .join(' | ')
-      );
+    // coleta estruturada
+    function collectSellOut() {
+      return Array.from(document.querySelectorAll('#items-container-sell-out .item-row'))
+        .map(r=>({
+          familia: r.querySelector('input[name="item_familia[]"]').value||'',
+          produto: r.querySelector('input[name="item_produto[]"]').value||'',
+          unidades: r.querySelector('input[name="item_unidades[]"]').value||'',
+          verba: r.querySelector('input[name="item_verba[]"]').value||'',
+          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value||'',
+          ttc: r.querySelector('input[name="item_ttc[]"]').value||'',
+          ttv: r.querySelector('input[name="item_ttv[]"]').value||''
+        }));
+    }
+    function collectSellIn() {
+      return Array.from(document.querySelectorAll('#items-container-sell-in .item-row'))
+        .map(r=>({
+          familia: r.querySelector('input[name="item_familia[]"]').value||'',
+          produto: r.querySelector('input[name="item_produto[]"]').value||'',
+          unidades: r.querySelector('input[name="item_unidades[]"]').value||'',
+          verba: r.querySelector('input[name="item_verba[]"]').value||'',
+          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value||'',
+          ttc: r.querySelector('input[name="item_ttc[]"]').value||'',
+          ttv: r.querySelector('input[name="item_ttv[]"]').value||''
+        }));
+    }
+    function collectMerch() {
+      return Array.from(document.querySelectorAll('#merch-items-container .merch-item-row'))
+        .map(r=>({
+          verba: r.querySelector('input[name="merch_item_verba[]"]').value||'',
+          opcao: r.querySelector('select[name="merch_item_opcao[]"]').value||''
+        }));
     }
 
-    // --- Gera PDF e mostra DocuSign ---
-    document.getElementById('form-dossie').addEventListener('submit', async e => {
+    // desenha tabela
+    function drawTable(pdfDoc, page, font, yStart, title, headers, rows, colX) {
+      if (!rows.length) return { page, y: yStart };
+      let y = yStart;
+      page.drawText(title, { x:50, y, size:14, font });
+      y -= 18;
+      // cabeçalho
+      headers.forEach((h,i)=> page.drawText(h, { x:colX[i], y, size:12, font }));
+      y -= 16;
+      // linhas
+      rows.forEach(row=>{
+        headers.forEach((_,i)=>{
+          const key = Object.keys(row)[i];
+          page.drawText(row[key], { x:colX[i], y, size:10, font });
+        });
+        y -= 14;
+        if (y < 60) {
+          page = pdfDoc.addPage([595.28,841.89]);
+          y = 800;
+        }
+      });
+      return { page, y: y - 10 };
+    }
+
+    // gera PDF
+    document.getElementById('form-dossie').addEventListener('submit', async e=>{
       e.preventDefault();
       const files = document.getElementById('dossie_files').files;
-      if (!files.length) return alert("Selecione ao menos um arquivo para o dossiê.");
+      if (!files.length) return alert('Selecione arquivos para o dossiê.');
 
-      // campos comuns
       const rede     = document.getElementById('rede').value;
       const mercado  = document.getElementById('mercado').value;
       const cidade   = document.getElementById('cidade').value;
@@ -435,61 +392,65 @@
       const contrato = document.getElementById('contrato').value;
       const tipo     = document.querySelector('.tabs-nav li.active').textContent;
 
-      // itens
-      const sellOut = collectItems('items-container-sell-out');
-      const sellIn  = collectItems('items-container-sell-in');
-      const merch   = collectItems('merch-items-container');
+      const sellOut = collectSellOut();
+      const sellIn  = collectSellIn();
+      const merch   = collectMerch();
 
       const pdfDoc = await PDFLib.PDFDocument.create();
-      let page = pdfDoc.addPage([595.28, 841.89]);
+      let page = pdfDoc.addPage([595.28,841.89]);
       const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
       let y = 800;
 
       // capa
-      page.drawText("Dossiê de Verba", { x:50, y, size:24, font });
+      page.drawText('Dossiê de Verba', { x:50, y, size:24, font });
       y -= 30;
       [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
         `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
         `Data: ${new Date().toLocaleDateString()}` ]
-        .forEach(line => {
+        .forEach(line=>{
           page.drawText(line, { x:50, y, size:12, font });
           y -= 18;
         });
       y -= 10;
 
-      function drawSection(title, items) {
-        page.drawText(title, { x:50, y, size:14, font });
-        y -= 20;
-        items.forEach(txt => {
-          page.drawText(txt, { x:60, y, size:10, font });
-          y -= 14;
-          if (y < 50) {
-            page = pdfDoc.addPage([595.28, 841.89]);
-            y = 800;
-          }
-        });
-        y -= 10;
-      }
-      drawSection("SELL OUT:", sellOut);
-      drawSection("SELL IN:", sellIn);
-      drawSection("MERCHANDISING:", merch);
+      // tabelas
+      ({ page, y } = drawTable(pdfDoc, page, font, y,
+        'SELL OUT', 
+        ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
+        sellOut,
+        [50,140,260,330,400,470,530]
+      ));
+      ({ page, y } = drawTable(pdfDoc, page, font, y,
+        'SELL IN', 
+        ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
+        sellIn,
+        [50,140,260,330,400,470,530]
+      ));
+      ({ page, y } = drawTable(pdfDoc, page, font, y,
+        'MERCHANDISING', 
+        ['Verba (R$)','Opção'], 
+        merch,
+        [50,200]
+      ));
 
       // anexos
       for (const file of files) {
         const buf = await file.arrayBuffer();
-        if (file.type.startsWith("image/")) {
-          const img = file.type === "image/png"
+        if (file.type.startsWith('image/')) {
+          const img = file.type==='image/png'
             ? await pdfDoc.embedPng(buf)
             : await pdfDoc.embedJpg(buf);
-          const imgPage = pdfDoc.addPage([595.28, 841.89]);
+          const imgPage = pdfDoc.addPage([595.28,841.89]);
           const { width, height } = imgPage.getSize();
-          const dims = img.scaleToFit(width - 40, height - 40);
-          imgPage.drawImage(img, { x:20, y: height - dims.height -20,
-                                   width: dims.width, height: dims.height });
-        } else if (file.type === "application/pdf") {
+          const dims = img.scaleToFit(width-40, height-40);
+          imgPage.drawImage(img, {
+            x:20, y: height-dims.height-20,
+            width: dims.width, height: dims.height
+          });
+        } else if (file.type==='application/pdf') {
           const donor = await PDFLib.PDFDocument.load(buf);
           const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copied.forEach(p => pdfDoc.addPage(p));
+          copied.forEach(p=>pdfDoc.addPage(p));
         }
       }
 
@@ -501,32 +462,16 @@
       a.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
       a.click();
 
-      // mostra botão DocuSign
+      // botão DocuSign
       document.getElementById('btn-docusign').style.display = 'block';
     });
 
-    // --- DocuSign stub ---
-    document.getElementById('btn-docusign').addEventListener('click', () => {
-      if (!window._lastPdfBlob) return alert("Gere primeiro o PDF.");
-      sendToDocuSign(window._lastPdfBlob);
+    // DocuSign stub
+    document.getElementById('btn-docusign').addEventListener('click', ()=>{
+      if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
+      // integrar aqui...
+      alert('Enviando para DocuSign...');
     });
-    async function sendToDocuSign(pdfBlob) {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result.split(',')[1];
-        await fetch('/api/docusign/envelope', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({
-            name: 'Dossiê de Verba',
-            pdfBase64: base64,
-            signers: [ /* defina seus signatários aqui */ ]
-          })
-        });
-        alert('Solicitação de assinatura enviada!');
-      };
-      reader.readAsDataURL(pdfBlob);
-    }
   </script>
 </body>
 </html>
