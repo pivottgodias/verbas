@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <!-- Meta tag para responsividade -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Verba</title>
   <style>
@@ -23,8 +24,6 @@
       width: 100%; padding: 8px; margin-top: 4px;
       border: 1px solid #ccc; border-radius: 4px;
     }
-    .error { border: 1px solid red; }
-    .error-message { color: red; font-size: 12px; margin-top: 4px; }
     .tabs-nav {
       list-style: none; display: flex; justify-content: center;
       gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #007BFF;
@@ -84,36 +83,30 @@
         <div>
           <label for="rede">Rede</label>
           <input type="text" id="rede" name="rede">
-          <div class="error-message" id="rede-error"></div>
         </div>
         <div>
           <label for="mercado">Mercado</label>
           <input type="text" id="mercado" name="mercado">
-          <div class="error-message" id="mercado-error"></div>
         </div>
       </div>
       <div class="row">
         <div>
           <label for="cidade">Cidade</label>
           <input type="text" id="cidade" name="cidade">
-          <div class="error-message" id="cidade-error"></div>
         </div>
         <div>
           <label for="uf">UF</label>
           <input type="text" id="uf" name="uf" maxlength="2">
-          <div class="error-message" id="uf-error"></div>
         </div>
       </div>
       <div class="row">
         <div>
           <label for="vendedor">Vendedor</label>
           <input type="text" id="vendedor" name="vendedor">
-          <div class="error-message" id="vendedor-error"></div>
         </div>
         <div>
           <label for="contrato">Contrato</label>
           <input type="text" id="contrato" name="contrato">
-          <div class="error-message" id="contrato-error"></div>
         </div>
       </div>
     </div>
@@ -246,7 +239,6 @@
     <div class="file-upload">
       <label for="dossie_files">Arquivos para o Dossiê (.pdf, .jpg, .png):</label>
       <input type="file" id="dossie_files" name="dossie_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
-      <div class="error-message" id="files-error"></div>
     </div>
     <br><br>
     <button type="submit">Salvar e Gerar Dossiê</button>
@@ -258,108 +250,242 @@
   <!-- pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    // Persistência de dados
-    document.addEventListener('DOMContentLoaded', () => {
-      const fields = ['rede', 'mercado', 'cidade', 'uf', 'vendedor', 'contrato'];
-      fields.forEach(field => {
-        const value = localStorage.getItem(field);
-        if (value) document.getElementById(field).value = value;
-      });
-    });
+    // abas
+    const tabs = document.querySelectorAll('.tabs-nav li');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      contents.forEach(c => c.classList.remove('active'));
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    }));
 
-    document.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('input', () => {
-        localStorage.setItem(el.id || el.name, el.value);
-      });
-    });
+    // inicializa linhas dinâmicas
+    function initRow(container, selector, isMerch = false) {
+      document.querySelectorAll(container + ' ' + selector).forEach(row => {
+        if (!isMerch) {
+          ['.item-bonificacao', '.item-unidades'].forEach(sel => {
+            row.querySelector(sel)?.addEventListener('input', () => {
+              const bon = parseFloat(row.querySelector('.item-bonificacao').value) || 0;
+              const und = parseFloat(row.querySelector('.item-unidades').value) || 0;
+              row.querySelector('.item-verba').value = (bon * und).toFixed(2);
+            });
+          });
 
-    // Validação de formulário
-    function validateForm() {
-      let isValid = true;
-      const fields = ['rede', 'mercado', 'cidade', 'uf', 'vendedor', 'contrato'];
-      fields.forEach(field => {
-        const el = document.getElementById(field);
-        const errorEl = document.getElementById(`${field}-error`);
-        if (!el.value) {
-          el.classList.add('error');
-          errorEl.textContent = 'Campo obrigatório';
-          isValid = false;
+          row.querySelector('.remove-item')?.addEventListener('click', () => {
+            const parent = row.parentElement;
+            if (parent.childElementCount > 1) parent.removeChild(row);
+            else alert('Ao menos um item deve permanecer.');
+          });
         } else {
-          el.classList.remove('error');
-          errorEl.textContent = '';
+          row.querySelector('.remove-merch-item')?.addEventListener('click', () => {
+            const parent = row.parentElement;
+            if (parent.childElementCount > 1) parent.removeChild(row);
+            else alert('Ao menos um item deve permanecer.');
+          });
         }
       });
-      const files = document.getElementById('dossie_files').files;
-      const filesError = document.getElementById('files-error');
-      if (!files.length) {
-        filesError.textContent = 'Selecione pelo menos um arquivo.';
-        isValid = false;
-      } else {
-        filesError.textContent = '';
-      }
-      return isValid;
     }
 
-    // Funções existentes (abas, adição/remoção de itens, coleta de dados, etc.)
-    // ... (mantidas as mesmas)
+    initRow('#items-container-sell-out', '.item-row');
+    initRow('#items-container-sell-in', '.item-row');
+    initRow('#merch-items-container', '.merch-item-row', true);
 
-    // Geração de PDF com bordas
+    // adiciona novo item
+    document.getElementById('add-item-sell-out').addEventListener('click', () => {
+      const tpl = document.querySelector('#items-container-sell-out .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('items-container-sell-out').appendChild(nw);
+      initRow('#items-container-sell-out', '.item-row');
+    });
+
+    document.getElementById('add-item-sell-in').addEventListener('click', () => {
+      const tpl = document.querySelector('#items-container-sell-in .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('items-container-sell-in').appendChild(nw);
+      initRow('#items-container-sell-in', '.item-row');
+    });
+
+    document.getElementById('add-merch-item').addEventListener('click', () => {
+      const tpl = document.querySelector('#merch-items-container .merch-item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
+      document.getElementById('merch-items-container').appendChild(nw);
+      initRow('#merch-items-container', '.merch-item-row', true);
+    });
+
+    // coleta dados
+    function collectSellOut() {
+      return Array.from(document.querySelectorAll('#items-container-sell-out .item-row'))
+        .map(r => ({
+          familia: r.querySelector('input[name="item_familia[]"]').value || '',
+          produto: r.querySelector('input[name="item_produto[]"]').value || '',
+          unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+          verba: r.querySelector('input[name="item_verba[]"]').value || '',
+          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+          ttc: r.querySelector('input[name="item_ttc[]"]').value || '',
+          ttv: r.querySelector('input[name="item_ttv[]"]').value || ''
+        }));
+    }
+
+    function collectSellIn() {
+      return Array.from(document.querySelectorAll('#items-container-sell-in .item-row'))
+        .map(r => ({
+          familia: r.querySelector('input[name="item_familia[]"]').value || '',
+          produto: r.querySelector('input[name="item_produto[]"]').value || '',
+          unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+          verba: r.querySelector('input[name="item_verba[]"]').value || '',
+          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+          ttc: r.querySelector('input[name="item_ttc[]"]').value || '',
+          ttv: r.querySelector('input[name="item_ttv[]"]').value || ''
+        }));
+    }
+
+    function collectMerch() {
+      return Array.from(document.querySelectorAll('#merch-items-container .merch-item-row'))
+        .map(r => ({
+          verba: r.querySelector('input[name="merch_item_verba[]"]').value || '',
+          opcao: r.querySelector('select[name="merch_item_opcao[]"]').value || ''
+        }));
+    }
+
+    // desenha tabela no PDF
     function drawTable(pdfDoc, page, font, yStart, title, headers, rows, colX) {
       if (!rows.length) return { page, y: yStart };
       let y = yStart;
-      page.drawText(title, { x:50, y, size:14, font });
-      y -= 20;
-      // Cabeçalho com bordas
-      headers.forEach((h,i) => {
-        page.drawText(h, { x:colX[i], y, size:12, font });
-        page.drawLine({
-          start: { x: colX[i], y: y + 10 },
-          end: { x: colX[i] + 80, y: y + 10 },
-          thickness: 1,
-          color: PDFLib.rgb(0, 0, 0),
-        });
-      });
-      y -= 20;
-      // Linhas
+      page.drawText(title, { x: 50, y, size: 14, font });
+      y -= 18;
+
+      // cabeçalho
+      headers.forEach((h, i) => page.drawText(h, { x: colX[i], y, size: 12, font }));
+      y -= 16;
+
+      // linhas
       rows.forEach(row => {
-        headers.forEach((_,i) => {
+        headers.forEach((_, i) => {
           const key = Object.keys(row)[i];
-          page.drawText(row[key], { x:colX[i], y, size:10, font });
+          page.drawText(row[key], { x: colX[i], y, size: 10, font });
         });
         y -= 14;
         if (y < 60) {
-          page = pdfDoc.addPage([595.28,841.89]);
+          page = pdfDoc.addPage([595.28, 841.89]);
           y = 800;
         }
       });
+
       return { page, y: y - 10 };
     }
 
-    // Envio para DocuSign (simulação)
-    document.getElementById('btn-docusign').addEventListener('click', async () => {
-      if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
+    // gera PDF
+    document.getElementById('form-dossie').addEventListener('submit', async e => {
+      e.preventDefault();
+      const files = document.getElementById('dossie_files').files;
+      if (!files.length) return alert('Selecione arquivos para o dossiê.');
+
       try {
-        const response = await fetch('https://api.docusign.com/v2/signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ document: window._lastPdfBlob })
+        const rede = document.getElementById('rede').value || 'N/A';
+        const mercado = document.getElementById('mercado').value || 'N/A';
+        const cidade = document.getElementById('cidade').value || 'N/A';
+        const uf = document.getElementById('uf').value || 'N/A';
+        const vendedor = document.getElementById('vendedor').value || 'N/A';
+        const contrato = document.getElementById('contrato').value || 'N/A';
+        const tipo = document.querySelector('.tabs-nav li.active').textContent;
+
+        const sellOut = collectSellOut();
+        const sellIn = collectSellIn();
+        const merch = collectMerch();
+
+        const pdfDoc = await PDFLib.PDFDocument.create();
+        let page = pdfDoc.addPage([595.28, 841.89]);
+        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+        let y = 800;
+
+        // capa
+        page.drawText('Dossiê de Verba', { x: 50, y, size: 24, font });
+        y -= 30;
+        [
+          `Rede: ${rede}`,
+          `Mercado: ${mercado}`,
+          `Cidade/UF: ${cidade} - ${uf}`,
+          `Vendedor: ${vendedor}`,
+          `Contrato: ${contrato}`,
+          `Tipo: ${tipo}`,
+          `Data: ${new Date().toLocaleDateString()}`
+        ].forEach(line => {
+          page.drawText(line, { x: 50, y, size: 12, font });
+          y -= 18;
         });
-        if (response.ok) {
-          alert('PDF enviado para assinatura!');
-        } else {
-          alert('Erro ao enviar para DocuSign.');
+
+        y -= 10;
+
+        // tabelas
+        ({ page, y } = drawTable(
+          pdfDoc, page, font, y,
+          'SELL OUT',
+          ['Família', 'Produto', 'Unidades', 'Verba', 'Bonificação', 'TTC', 'TTV'],
+          sellOut,
+          [50, 140, 260, 330, 400, 470, 530]
+        ));
+        ({ page, y } = drawTable(
+          pdfDoc, page, font, y,
+          'SELL IN',
+          ['Família', 'Produto', 'Unidades', 'Verba', 'Bonificação', 'TTC', 'TTV'],
+          sellIn,
+          [50, 140, 260, 330, 400, 470, 530]
+        ));
+        ({ page, y } = drawTable(
+          pdfDoc, page, font, y,
+          'MERCHANDISING',
+          ['Verba (R$)', 'Opção'],
+          merch,
+          [50, 200]
+        ));
+
+        // anexos
+        for (const file of files) {
+          const buf = await file.arrayBuffer();
+          if (file.type.startsWith('image/')) {
+            const img = file.type === 'image/png'
+              ? await pdfDoc.embedPng(buf)
+              : await pdfDoc.embedJpg(buf);
+            const imgPage = pdfDoc.addPage([595.28, 841.89]);
+            const { width, height } = imgPage.getSize();
+            const dims = img.scaleToFit(width - 40, height - 40);
+            imgPage.drawImage(img, {
+              x: 20, y: height - dims.height - 20,
+              width: dims.width, height: dims.height
+            });
+          } else if (file.type === 'application/pdf') {
+            const donor = await PDFLib.PDFDocument.load(buf);
+            const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
+            copied.forEach(p => pdfDoc.addPage(p));
+          }
         }
-      } catch (err) {
-        console.error(err);
-        alert('Erro ao conectar com DocuSign.');
+
+        // salva e baixa
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dossie_${tipo.toLowerCase().replace(/ /g, '_')}.pdf`;
+        a.click();
+
+        // exibe botão DocuSign
+        document.getElementById('btn-docusign').style.display = 'block';
+
+      } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        alert('Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.');
       }
     });
 
-    // Submit do formulário
-    document.getElementById('form-dossie').addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!validateForm()) return;
-      // Restante do código de geração de PDF...
+    // stub para DocuSign
+    document.getElementById('btn-docusign').addEventListener('click', () => {
+      if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
+      alert('Enviando para DocuSign...');
     });
   </script>
 </body>
