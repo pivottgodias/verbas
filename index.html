@@ -252,134 +252,168 @@
     <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
 
-  <!-- DocuSign -->
+  <!-- Botão DocuSign (inicialmente oculto) -->
   <button id="btn-docusign" style="display:none; margin:20px auto; display:block;">
     Enviar para Assinatura (DocuSign)
   </button>
 
-  <!-- pdf-lib -->
+  <!-- Biblioteca pdf-lib -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    // abas
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+
+    // Abas
     const tabs = document.querySelectorAll('.tabs-nav li');
     const contents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.addEventListener('click', () => {
-      tabs.forEach(t=>t.classList.remove('active'));
-      tab.classList.add('active');
-      contents.forEach(c=>c.classList.remove('active'));
-      document.getElementById(tab.dataset.tab).classList.add('active');
-    }));
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        contents.forEach(c => c.classList.remove('active'));
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
 
-    // init dynamic rows
-    function initRow(container, selector, isMerch=false) {
-      document.querySelectorAll(container + ' ' + selector).forEach(row=>{
-        if (!isMerch) {
-          ['.item-bonificacao','.item-unidades'].forEach(sel=>
-            row.querySelector(sel).addEventListener('input', ()=>{
-              const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
-              const und = parseFloat(row.querySelector('.item-unidades').value)||0;
-              row.querySelector('.item-verba').value = (bon*und).toFixed(2);
-            })
-          );
-          row.querySelector('.remove-item').addEventListener('click', ()=>{
-            const p=row.parentElement;
-            if(p.childElementCount>1) p.removeChild(row);
-            else alert('Ao menos um item.');
+    // Inicialização de linhas dinâmicas
+    function initRows() {
+      document.querySelectorAll('#items-container-sell-out .item-row').forEach(row => {
+        row.querySelector('.remove-item').addEventListener('click', () => {
+          const p = row.parentElement;
+          if (p.childElementCount > 1) p.removeChild(row);
+          else alert('Você deve ter ao menos um item.');
+        });
+        ['.item-bonificacao','.item-unidades'].forEach(sel => {
+          row.querySelector(sel).addEventListener('input', () => {
+            const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
+            const und = parseFloat(row.querySelector('.item-unidades').value)||0;
+            row.querySelector('.item-verba').value = (bon*und).toFixed(2);
           });
-        } else {
-          row.querySelector('.remove-merch-item').addEventListener('click', ()=>{
-            const p=row.parentElement;
-            if(p.childElementCount>1) p.removeChild(row);
-            else alert('Ao menos um item.');
+        });
+      });
+      document.querySelectorAll('#items-container-sell-in .item-row').forEach(row => {
+        row.querySelector('.remove-item').addEventListener('click', () => {
+          const p = row.parentElement;
+          if (p.childElementCount > 1) p.removeChild(row);
+          else alert('Você deve ter ao menos um item.');
+        });
+        ['.item-bonificacao','.item-unidades'].forEach(sel => {
+          row.querySelector(sel).addEventListener('input', () => {
+            const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
+            const und = parseFloat(row.querySelector('.item-unidades').value)||0;
+            row.querySelector('.item-verba').value = (bon*und).toFixed(2);
           });
-        }
+        });
+      });
+      document.querySelectorAll('#merch-items-container .merch-item-row').forEach(row => {
+        row.querySelector('.remove-merch-item').addEventListener('click', () => {
+          const p = row.parentElement;
+          if (p.childElementCount > 1) p.removeChild(row);
+          else alert('Você deve ter ao menos um item.');
+        });
       });
     }
-    initRow('#items-container-sell-out','.item-row');
-    initRow('#items-container-sell-in','.item-row');
-    initRow('#merch-items-container','.merch-item-row',true);
-
-    document.getElementById('add-item-sell-out').addEventListener('click', ()=>{
-      const tpl=document.querySelector('#items-container-sell-out .item-row');
-      const nw=tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>i.value='');
+    initRows();
+    document.getElementById('add-item-sell-out').addEventListener('click', () => {
+      const tpl = document.querySelector('#items-container-sell-out .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => i.value = '');
       document.getElementById('items-container-sell-out').appendChild(nw);
-      initRow('#items-container-sell-out','.item-row');
+      initRows();
     });
-    document.getElementById('add-item-sell-in').addEventListener('click', ()=>{
-      const tpl=document.querySelector('#items-container-sell-in .item-row');
-      const nw=tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>i.value='');
+    document.getElementById('add-item-sell-in').addEventListener('click', () => {
+      const tpl = document.querySelector('#items-container-sell-in .item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => i.value = '');
       document.getElementById('items-container-sell-in').appendChild(nw);
-      initRow('#items-container-sell-in','.item-row');
+      initRows();
     });
-    document.getElementById('add-merch-item').addEventListener('click', ()=>{
-      const tpl=document.querySelector('#merch-items-container .merch-item-row');
-      const nw=tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i=>{ if(i.type!=='file') i.value=''; });
+    document.getElementById('add-merch-item').addEventListener('click', () => {
+      const tpl = document.querySelector('#merch-items-container .merch-item-row');
+      const nw = tpl.cloneNode(true);
+      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
       document.getElementById('merch-items-container').appendChild(nw);
-      initRow('#merch-items-container','.merch-item-row',true);
+      initRows();
     });
 
-    // coleta estruturada
+    // Coleta de dados
     function collectSellOut() {
       return Array.from(document.querySelectorAll('#items-container-sell-out .item-row'))
-        .map(r=>({
-          familia: r.querySelector('input[name="item_familia[]"]').value||'',
-          produto: r.querySelector('input[name="item_produto[]"]').value||'',
-          unidades: r.querySelector('input[name="item_unidades[]"]').value||'',
-          verba: r.querySelector('input[name="item_verba[]"]').value||'',
-          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value||'',
-          ttc: r.querySelector('input[name="item_ttc[]"]').value||'',
-          ttv: r.querySelector('input[name="item_ttv[]"]').value||''
+        .map(r => ({
+          Familia: r.querySelector('input[name="item_familia[]"]').value || '',
+          Produto: r.querySelector('input[name="item_produto[]"]').value || '',
+          Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+          Verba: r.querySelector('input[name="item_verba[]"]').value || '',
+          Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+          TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
+          TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
         }));
     }
     function collectSellIn() {
       return Array.from(document.querySelectorAll('#items-container-sell-in .item-row'))
-        .map(r=>({
-          familia: r.querySelector('input[name="item_familia[]"]').value||'',
-          produto: r.querySelector('input[name="item_produto[]"]').value||'',
-          unidades: r.querySelector('input[name="item_unidades[]"]').value||'',
-          verba: r.querySelector('input[name="item_verba[]"]').value||'',
-          bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value||'',
-          ttc: r.querySelector('input[name="item_ttc[]"]').value||'',
-          ttv: r.querySelector('input[name="item_ttv[]"]').value||''
+        .map(r => ({
+          Familia: r.querySelector('input[name="item_familia[]"]').value || '',
+          Produto: r.querySelector('input[name="item_produto[]"]').value || '',
+          Unidades: r.querySelector('input[name="item_unidades[]"]').value || '',
+          Verba: r.querySelector('input[name="item_verba[]"]').value || '',
+          Bonificacao: r.querySelector('input[name="item_bonificacao[]"]').value || '',
+          TTC: r.querySelector('input[name="item_ttc[]"]').value || '',
+          TTV: r.querySelector('input[name="item_ttv[]"]').value || ''
         }));
     }
     function collectMerch() {
       return Array.from(document.querySelectorAll('#merch-items-container .merch-item-row'))
-        .map(r=>({
-          verba: r.querySelector('input[name="merch_item_verba[]"]').value||'',
-          opcao: r.querySelector('select[name="merch_item_opcao[]"]').value||''
+        .map(r => ({
+          'Verba (R$)': r.querySelector('input[name="merch_item_verba[]"]').value || '',
+          Opcao: r.querySelector('select[name="merch_item_opcao[]"]').value || ''
         }));
     }
 
-    // desenha tabela
+    // Desenha tabela com células e cabeçalho em caixa alta
     function drawTable(pdfDoc, page, font, yStart, title, headers, rows, colX) {
       if (!rows.length) return { page, y: yStart };
       let y = yStart;
-      page.drawText(title, { x:50, y, size:14, font });
-      y -= 18;
-      // cabeçalho
-      headers.forEach((h,i)=> page.drawText(h, { x:colX[i], y, size:12, font }));
-      y -= 16;
-      // linhas
-      rows.forEach(row=>{
-        headers.forEach((_,i)=>{
-          const key = Object.keys(row)[i];
-          page.drawText(row[key], { x:colX[i], y, size:10, font });
+      page.drawText(title, { x: 50, y, size: 14, font });
+      y -= 20;
+      const cellHeight = 20;
+      headers.forEach((h, i) => {
+        const text = h.toUpperCase();
+        const x0 = colX[i];
+        const cellWidth = (i < headers.length - 1)
+          ? colX[i + 1] - x0 - 10
+          : page.getWidth() - x0 - 50;
+        page.drawRectangle({
+          x: x0 - 2, y: y - 2,
+          width: cellWidth, height: cellHeight,
+          borderColor: rgb(0, 0, 0), borderWidth: 1
         });
-        y -= 14;
+        page.drawText(text, { x: x0, y: y + 4, size: 12, font });
+      });
+      y -= cellHeight + 4;
+      rows.forEach(row => {
+        const values = Object.values(row);
+        values.forEach((val, j) => {
+          const x0 = colX[j];
+          const cellWidth = (j < values.length - 1)
+            ? colX[j + 1] - x0 - 10
+            : page.getWidth() - x0 - 50;
+          page.drawRectangle({
+            x: x0 - 2, y: y - 2,
+            width: cellWidth, height: cellHeight,
+            borderColor: rgb(0, 0, 0), borderWidth: 1
+          });
+          page.drawText(val.toString(), { x: x0, y: y + 4, size: 10, font });
+        });
+        y -= cellHeight + 4;
         if (y < 60) {
-          page = pdfDoc.addPage([595.28,841.89]);
+          page = pdfDoc.addPage([595.28, 841.89]);
           y = 800;
         }
       });
-      return { page, y: y - 10 };
+      return { page, y };
     }
 
-    // gera PDF
-    document.getElementById('form-dossie').addEventListener('submit', async e=>{
+    // Geração do PDF
+    document.getElementById('form-dossie').addEventListener('submit', async e => {
       e.preventDefault();
       const files = document.getElementById('dossie_files').files;
       if (!files.length) return alert('Selecione arquivos para o dossiê.');
@@ -396,80 +430,79 @@
       const sellIn  = collectSellIn();
       const merch   = collectMerch();
 
-      const pdfDoc = await PDFLib.PDFDocument.create();
-      let page = pdfDoc.addPage([595.28,841.89]);
-      const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      const pdfDoc = await PDFDocument.create();
+      let page = pdfDoc.addPage([595.28, 841.89]);
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       let y = 800;
 
-      // capa
-      page.drawText('Dossiê de Verba', { x:50, y, size:24, font });
+      // Capa
+      page.drawText('Dossiê de Verba', { x: 50, y, size: 24, font });
       y -= 30;
       [ `Rede: ${rede}`, `Mercado: ${mercado}`, `Cidade/UF: ${cidade} - ${uf}`,
         `Vendedor: ${vendedor}`, `Contrato: ${contrato}`, `Tipo: ${tipo}`,
         `Data: ${new Date().toLocaleDateString()}` ]
-        .forEach(line=>{
-          page.drawText(line, { x:50, y, size:12, font });
+        .forEach(line => {
+          page.drawText(line, { x: 50, y, size: 12, font });
           y -= 18;
         });
       y -= 10;
 
-      // tabelas
+      // Tabelas
       ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'SELL OUT', 
+        'SELL OUT',
         ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
         sellOut,
-        [50,140,260,330,400,470,530]
+        [50, 140, 260, 330, 400, 470, 530]
       ));
       ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'SELL IN', 
+        'SELL IN',
         ['Família','Produto','Unidades','Verba','Bonificação','TTC','TTV'],
         sellIn,
-        [50,140,260,330,400,470,530]
+        [50, 140, 260, 330, 400, 470, 530]
       ));
       ({ page, y } = drawTable(pdfDoc, page, font, y,
-        'MERCHANDISING', 
-        ['Verba (R$)','Opção'], 
+        'MERCHANDISING',
+        ['Verba (R$)','Opção'],
         merch,
-        [50,200]
+        [50, 200]
       ));
 
-      // anexos
+      // Anexos
       for (const file of files) {
         const buf = await file.arrayBuffer();
         if (file.type.startsWith('image/')) {
-          const img = file.type==='image/png'
+          const img = file.type === 'image/png'
             ? await pdfDoc.embedPng(buf)
             : await pdfDoc.embedJpg(buf);
-          const imgPage = pdfDoc.addPage([595.28,841.89]);
+          const imgPage = pdfDoc.addPage([595.28, 841.89]);
           const { width, height } = imgPage.getSize();
-          const dims = img.scaleToFit(width-40, height-40);
+          const dims = img.scaleToFit(width - 40, height - 40);
           imgPage.drawImage(img, {
-            x:20, y: height-dims.height-20,
+            x: 20, y: height - dims.height - 20,
             width: dims.width, height: dims.height
           });
-        } else if (file.type==='application/pdf') {
-          const donor = await PDFLib.PDFDocument.load(buf);
+        } else if (file.type === 'application/pdf') {
+          const donor = await PDFDocument.load(buf);
           const copied = await pdfDoc.copyPages(donor, donor.getPageIndices());
-          copied.forEach(p=>pdfDoc.addPage(p));
+          copied.forEach(p => pdfDoc.addPage(p));
         }
       }
 
-      // salva e baixa
+      // Salva e download
       const pdfBytes = await pdfDoc.save();
-      window._lastPdfBlob = new Blob([pdfBytes], { type:'application/pdf' });
+      window._lastPdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(window._lastPdfBlob);
       a.download = `dossie_${tipo.toLowerCase().replace(/ /g,'_')}.pdf`;
       a.click();
 
-      // botão DocuSign
+      // Exibe DocuSign
       document.getElementById('btn-docusign').style.display = 'block';
     });
 
     // DocuSign stub
-    document.getElementById('btn-docusign').addEventListener('click', ()=>{
+    document.getElementById('btn-docusign').addEventListener('click', () => {
       if (!window._lastPdfBlob) return alert('Gere o PDF primeiro.');
-      // integrar aqui...
       alert('Enviando para DocuSign...');
     });
   </script>
