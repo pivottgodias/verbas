@@ -2,304 +2,133 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Gerador de Dossiê Avançado</title>
+  <title>Gerador de Dossiê</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
-    .input-group { margin: 15px 0; }
-    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, select { padding: 8px; width: 200px; margin-right: 10px; border: 1px solid #ddd; }
-    input:invalid { border-color: #ff4444; box-shadow: 0 0 3px #ff444466; }
-    button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
-    .item-container { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-    th { background-color: #f8f9fa; text-transform: uppercase; font-size: 0.9em; }
-    .new-row { background-color: #ffffcc; transition: background-color 1s; }
-    .actions { display: flex; gap: 10px; }
-    .actions button { padding: 5px 10px; font-size: 0.8em; }
-    .delete-btn { background-color: #ff4444; }
-    .delete-btn:hover { background-color: #cc0000; }
-    .edit-btn { background-color: #ffbb33; }
-    .edit-btn:hover { background-color: #ff8800; }
+    body { font-family: Arial; padding: 20px; }
+    .item-container { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background-color: #f0f0f0; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
   <h1>Cadastro de Verba</h1>
 
-  <div class="input-group">
-    <label for="tipoVerba">Tipo de Verba:</label>
-    <select id="tipoVerba" required>
-      <option value="">Selecione...</option>
-      <option value="SELL IN">SELL IN</option>
-      <option value="SELL OUT">SELL OUT</option>
-      <option value="MERCHANDISING">MERCHANDISING</option>
-    </select>
-  </div>
+  <label for="tipoVerba">Tipo de Verba:</label>
+  <select id="tipoVerba">
+    <option value="SELL IN">SELL IN</option>
+    <option value="SELL OUT">SELL OUT</option>
+    <option value="MERCHANDISING">MERCHANDISING</option>
+  </select>
 
-  <div class="input-grid">
-    <div class="input-group">
-      <label for="familia">Família:</label>
-      <input type="text" id="familia" required placeholder="Informe a família">
-    </div>
-    
-    <div class="input-group">
-      <label for="produto">Produto:</label>
-      <input type="text" id="produto" required placeholder="Nome do produto">
-    </div>
-
-    <div class="input-group">
-      <label for="unidades">Unidades:</label>
-      <input type="number" id="unidades" min="1" required placeholder="Quantidade">
-    </div>
-
-    <div class="input-group">
-      <label for="verba">Verba (R$):</label>
-      <input type="number" step="0.01" id="verba" placeholder="Valor da verba">
-    </div>
-
-    <div class="input-group">
-      <label for="bonificacao">Bonificação (%):</label>
-      <input type="number" step="0.1" id="bonificacao" placeholder="Percentual">
-    </div>
-
-    <div class="input-group">
-      <label for="ttc">TTC:</label>
-      <input type="text" id="ttc" placeholder="TTC">
-    </div>
-
-    <div class="input-group">
-      <label for="ttv">TTV:</label>
-      <input type="text" id="ttv" placeholder="TTV">
-    </div>
+  <div id="camposComuns">
+    <input type="text" placeholder="Família" id="familia" />
+    <input type="text" placeholder="Produto" id="produto" />
+    <input type="number" placeholder="Unidades" id="unidades" />
+    <input type="text" placeholder="Verba" id="verba" />
+    <input type="text" placeholder="Bonificação" id="bonificacao" />
+    <input type="text" placeholder="TTC" id="ttc" />
+    <input type="text" placeholder="TTV" id="ttv" />
   </div>
 
   <button onclick="addItem()">Adicionar Item</button>
-  <button onclick="generatePDF()" style="margin-left: 20px;">Gerar PDF</button>
 
-  <div id="itemsContainer"></div>
+  <div id="SELL IN" class="item-container">
+    <h3>Itens SELL IN</h3>
+    <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div id="SELL OUT" class="item-container">
+    <h3>Itens SELL OUT</h3>
+    <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div id="MERCHANDISING" class="item-container">
+    <h3>Itens MERCHANDISING</h3>
+    <table><thead><tr><th>Família</th><th>Produto</th><th>Unidades</th><th>Verba</th><th>Bonificação</th><th>TTC</th><th>TTV</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <button onclick="generatePDF()">Gerar Dossiê PDF</button>
 
   <script>
-    class VerbaManager {
-      constructor() {
-        this.verbas = {
-          'SELL IN': [],
-          'SELL OUT': [],
-          'MERCHANDISING': []
-        };
-      }
-
-      add(tipo, item) {
-        if (!this.verbas[tipo]) return;
-        this.verbas[tipo].push(item);
-      }
-
-      getAll() {
-        return Object.entries(this.verbas)
-          .filter(([_, items]) => items.length > 0)
-          .reduce((acc, [tipo, items]) => ({ ...acc, [tipo]: items }), {});
-      }
-
-      delete(tipo, index) {
-        if (this.verbas[tipo] && this.verbas[tipo][index]) {
-          this.verbas[tipo].splice(index, 1);
-          return true;
-        }
-        return false;
-      }
-
-      sanitizeInput(value) {
-        return value.toString().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
-    }
-
-    const verbasManager = new VerbaManager();
-    let editIndex = null;
-    let currentEditType = null;
-
-    // Inicializar tabelas dinamicamente
-    function initTables() {
-      const container = document.getElementById('itemsContainer');
-      Object.keys(verbasManager.verbas).forEach(tipo => {
-        const section = document.createElement('div');
-        section.className = 'item-container';
-        section.id = tipo;
-        section.innerHTML = `
-          <h3>Itens ${tipo}</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Família</th>
-                <th>Produto</th>
-                <th>Unidades</th>
-                <th>Verba (R$)</th>
-                <th>Bonificação (%)</th>
-                <th>TTC</th>
-                <th>TTV</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        `;
-        container.appendChild(section);
-      });
-    }
-
     function addItem() {
-      const tipo = document.getElementById('tipoVerba').value;
-      const inputs = ['familia', 'produto', 'unidades', 'verba', 'bonificacao', 'ttc', 'ttv'];
-      
-      // Validação básica
-      if (!tipo) {
-        alert('Selecione um tipo de verba!');
-        return;
-      }
-      
-      const values = inputs.reduce((acc, id) => {
-        const element = document.getElementById(id);
-        acc[id] = element.value ? verbasManager.sanitizeInput(element.value) : '';
-        
-        // Validação de campos obrigatórios
-        if (['familia', 'produto', 'unidades'].includes(id) && !element.value) {
-          element.reportValidity();
-          throw new Error('Campos obrigatórios não preenchidos');
-        }
-        
-        return acc;
-      }, {});
+      const tipo = document.getElementById("tipoVerba").value;
+      const familia = document.getElementById("familia").value;
+      const produto = document.getElementById("produto").value;
+      const unidades = document.getElementById("unidades").value;
+      const verba = document.getElementById("verba").value;
+      const bonificacao = document.getElementById("bonificacao").value;
+      const ttc = document.getElementById("ttc").value;
+      const ttv = document.getElementById("ttv").value;
 
-      try {
-        if (editIndex !== null && currentEditType === tipo) {
-          // Edição existente
-          verbasManager.verbas[tipo][editIndex] = Object.values(values);
-          editIndex = null;
-          currentEditType = null;
-        } else {
-          // Novo item
-          verbasManager.add(tipo, Object.values(values));
-        }
-        updateTable(tipo);
-        clearForm();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
+      const tableBody = document.querySelector(`#${tipo} tbody`);
+      const row = document.createElement("tr");
 
-    function updateTable(tipo) {
-      const tbody = document.querySelector(`#${tipo} tbody`);
-      tbody.innerHTML = '';
-      
-      verbasManager.verbas[tipo].forEach((item, index) => {
-        const row = document.createElement('tr');
-        item.forEach(value => {
-          const td = document.createElement('td');
-          td.textContent = value;
-          row.appendChild(td);
-        });
-
-        // Adicionar botões de ação
-        const actionTd = document.createElement('td');
-        actionTd.className = 'actions';
-        
-        const editBtn = document.createElement('button');
-        editBtn.className = 'edit-btn';
-        editBtn.textContent = 'Editar';
-        editBtn.onclick = () => editItem(tipo, index);
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.textContent = 'Excluir';
-        deleteBtn.onclick = () => deleteItem(tipo, index);
-        
-        actionTd.append(editBtn, deleteBtn);
-        row.appendChild(actionTd);
-        
-        tbody.appendChild(row);
+      [familia, produto, unidades, verba, bonificacao, ttc, ttv].forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value;
+        row.appendChild(td);
       });
+
+      tableBody.appendChild(row);
+
+      // Limpar campos
+      document.getElementById("familia").value = "";
+      document.getElementById("produto").value = "";
+      document.getElementById("unidades").value = "";
+      document.getElementById("verba").value = "";
+      document.getElementById("bonificacao").value = "";
+      document.getElementById("ttc").value = "";
+      document.getElementById("ttv").value = "";
     }
 
-    function editItem(tipo, index) {
-      const item = verbasManager.verbas[tipo][index];
-      document.getElementById('tipoVerba').value = tipo;
-      document.getElementById('familia').value = item[0];
-      document.getElementById('produto').value = item[1];
-      document.getElementById('unidades').value = item[2];
-      document.getElementById('verba').value = item[3];
-      document.getElementById('bonificacao').value = item[4];
-      document.getElementById('ttc').value = item[5];
-      document.getElementById('ttv').value = item[6];
-      
-      editIndex = index;
-      currentEditType = tipo;
-    }
+    function collectItems() {
+      const tipos = ["SELL IN", "SELL OUT", "MERCHANDISING"];
+      const data = {};
 
-    function deleteItem(tipo, index) {
-      if (confirm('Tem certeza que deseja excluir este item?')) {
-        if (verbasManager.delete(tipo, index)) {
-          updateTable(tipo);
+      tipos.forEach(tipo => {
+        const rows = document.querySelectorAll(`#${tipo} tbody tr`);
+        if (rows.length > 0) {
+          data[tipo] = Array.from(rows).map(row => {
+            return Array.from(row.children).map(td => td.textContent);
+          });
         }
-      }
-    }
-
-    function clearForm() {
-      ['familia', 'produto', 'unidades', 'verba', 'bonificacao', 'ttc', 'ttv'].forEach(id => {
-        document.getElementById(id).value = '';
       });
-      document.getElementById('tipoVerba').value = '';
+
+      return data;
     }
 
     function generatePDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const date = new Date().toLocaleDateString('pt-BR');
-      let yPos = 20;
+      doc.setFontSize(14);
+      doc.text("DOSSIÊ DE VERBAS", 14, 15);
+      doc.setFontSize(10);
+      doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 22);
 
-      // Cabeçalho
-      doc.setFontSize(18);
-      doc.setTextColor(40);
-      doc.text('RELATÓRIO CONSOLDADO DE VERBAS', 105, 15, { align: 'center' });
-      doc.setFontSize(12);
-      doc.text(`Data de emissão: ${date}`, 14, 25);
+      const items = collectItems();
+      let y = 30;
 
-      const items = verbasManager.getAll();
       Object.entries(items).forEach(([tipo, dados]) => {
-        // Adicionar seção
-        doc.setFontSize(14);
-        doc.setTextColor(0, 0, 0);
-        yPos += 10;
-        doc.text(tipo.toUpperCase(), 14, yPos);
-        
-        // Calcular totais
-        const totalVerba = dados.reduce((sum, row) => sum + parseFloat(row[3] || 0, 0);
-        const totalUnidades = dados.reduce((sum, row) => sum + parseInt(row[2] || 0, 0);
-
-        // Tabela
+        doc.setFontSize(12);
+        doc.text(`${tipo}`, 14, y);
+        y += 5;
         doc.autoTable({
-          startY: yPos + 5,
-          head: [['Família', 'Produto', 'Unidades', 'Verba (R$)', 'Bonificação (%)', 'TTC', 'TTV']],
+          startY: y,
+          head: [["FAMÍLIA", "PRODUTO", "UNIDADES", "VERBA", "BONIFICAÇÃO", "TTC", "TTV"]],
           body: dados,
           theme: 'grid',
-          styles: { fontSize: 9, cellPadding: 3 },
-          headStyles: { fillColor: [240, 240, 240], textColor: 0 },
-          footStyles: { fillColor: [220, 220, 220] },
-          didDrawPage: () => {
-            doc.setFontSize(10);
-            doc.text(`Total ${tipo}: R$ ${totalVerba.toFixed(2)} | Unidades: ${totalUnidades}`, 14, doc.lastAutoTable.finalY + 10);
-          }
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [200, 200, 200] }
         });
-
-        yPos = doc.lastAutoTable.finalY + 15;
+        y = doc.lastAutoTable.finalY + 10;
       });
 
-      doc.save(`relatorio_verbas_${date.replace(/\//g, '-')}.pdf`);
+      doc.save("dossie_verbas.pdf");
     }
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', initTables);
   </script>
 </body>
 </html>
