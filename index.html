@@ -118,7 +118,7 @@
             <div><label>TTC (R$)</label><input type="number" step="0.01" name="item_ttc[]"></div>
             <div><label>TTV (R$)</label><input type="number" step="0.01" name="item_ttv[]"></div>
           </div>
-          <div style="text-align: right; margin-top: 10px;">
+          <div style="text-align: right;">
             <button type="button" class="remove-item">Remover item</button>
           </div>
         </div>
@@ -142,7 +142,7 @@
             <div><label>TTC (R$)</label><input type="number" step="0.01" name="item_ttc[]"></div>
             <div><label>TTV (R$)</label><input type="number" step="0.01" name="item_ttv[]"></div>
           </div>
-          <div style="text-align: right; margin-top: 10px;">
+          <div style="text-align: right;">
             <button type="button" class="remove-item">Remover item</button>
           </div>
         </div>
@@ -167,7 +167,7 @@
             </div>
             <div><label>Foto (não entra na tabela)</label><input type="file" accept="image/*" name="merch_item_photo[]"></div>
           </div>
-          <div style="text-align: right; margin-top: 10px;">
+          <div style="text-align: right;">
             <button type="button" class="remove-merch-item">Remover item</button>
           </div>
         </div>
@@ -190,77 +190,63 @@
     Enviar para Assinatura (DocuSign)
   </button>
 
-  <!-- Biblioteca pdf-lib e script -->
+  <!-- pdf-lib + script -->
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script>
-    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    document.addEventListener('DOMContentLoaded', () => {
+      const { PDFDocument, StandardFonts, rgb } = PDFLib;
 
-    // Abas
-    document.querySelectorAll('.tabs-nav li').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tabs-nav li').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById(tab.dataset.tab).classList.add('active');
-      });
-    });
-
-    // Função para inicializar event listeners das linhas
-    function initRows() {
-      // SELL OUT & SELL IN
-      ['#items-container-sell-out', '#items-container-sell-in'].forEach(container => {
-        document.querySelectorAll(container + ' .item-row').forEach(row => {
-          row.querySelector('.remove-item').onclick = () => {
-            const p = row.parentElement;
-            if (p.childElementCount > 1) p.removeChild(row);
-            else alert('Ao menos um item.');
-          };
-          ['.item-bonificacao','.item-unidades'].forEach(sel => {
-            row.querySelector(sel).oninput = () => {
-              const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
-              const und = parseFloat(row.querySelector('.item-unidades').value)||0;
-              row.querySelector('.item-verba').value = (bon*und).toFixed(2);
-            };
-          });
+      // Tabs
+      document.querySelectorAll('.tabs-nav li').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tabs-nav li').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          document.getElementById(tab.dataset.tab).classList.add('active');
         });
       });
-      // MERCHANDISING
-      document.querySelectorAll('#merch-items-container .merch-item-row').forEach(row => {
-        row.querySelector('.remove-merch-item').onclick = () => {
-          const p = row.parentElement;
-          if (p.childElementCount > 1) p.removeChild(row);
-          else alert('Ao menos um item.');
-        };
+
+      // Delegate remove-item
+      document.body.addEventListener('click', e => {
+        if (e.target.matches('.remove-item')) {
+          const row = e.target.closest('.item-row');
+          const parent = row.parentElement;
+          if (parent.childElementCount > 1) parent.removeChild(row);
+          else alert('Você deve ter ao menos um item.');
+        }
+        if (e.target.matches('.remove-merch-item')) {
+          const row = e.target.closest('.merch-item-row');
+          const parent = row.parentElement;
+          if (parent.childElementCount > 1) parent.removeChild(row);
+          else alert('Você deve ter ao menos um item.');
+        }
       });
-    }
 
-    // Botões Adicionar
-    document.getElementById('add-item-sell-out').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-out .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value = '');
-      document.getElementById('items-container-sell-out').appendChild(nw);
-      initRows();
-    });
-    document.getElementById('add-item-sell-in').addEventListener('click', () => {
-      const tpl = document.querySelector('#items-container-sell-in .item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => i.value = '');
-      document.getElementById('items-container-sell-in').appendChild(nw);
-      initRows();
-    });
-    document.getElementById('add-merch-item').addEventListener('click', () => {
-      const tpl = document.querySelector('#merch-items-container .merch-item-row');
-      const nw = tpl.cloneNode(true);
-      nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
-      document.getElementById('merch-items-container').appendChild(nw);
-      initRows();
-    });
+      // Delegate bonificação×unidades
+      document.body.addEventListener('input', e => {
+        if (e.target.matches('.item-bonificacao, .item-unidades')) {
+          const row = e.target.closest('.item-row');
+          const bon = parseFloat(row.querySelector('.item-bonificacao').value) || 0;
+          const und = parseFloat(row.querySelector('.item-unidades').value)   || 0;
+          row.querySelector('.item-verba').value = (bon * und).toFixed(2);
+        }
+      });
 
-    // Inicializa na carga
-    initRows();
+      // Add-item buttons
+      function cloneAndAppend(buttonId, containerId, templateSelector) {
+        document.getElementById(buttonId).addEventListener('click', () => {
+          const tpl = document.querySelector(templateSelector);
+          const nw = tpl.cloneNode(true);
+          nw.querySelectorAll('input').forEach(i => { if (i.type !== 'file') i.value = ''; });
+          document.getElementById(containerId).appendChild(nw);
+        });
+      }
+      cloneAndAppend('add-item-sell-out', 'items-container-sell-out', '#items-container-sell-out .item-row');
+      cloneAndAppend('add-item-sell-in',  'items-container-sell-in',  '#items-container-sell-in .item-row');
+      cloneAndAppend('add-merch-item',    'merch-items-container',    '#merch-items-container .merch-item-row');
 
-    // ... restante do código de coleta, drawTable e geração de PDF permanece igual ...
+      // Restante (collect, drawTable, geração de PDF) permanece igual...
+    });
   </script>
 </body>
 </html>
