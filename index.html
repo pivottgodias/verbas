@@ -2,124 +2,379 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cadastro de Verba</title>
   <style>
-    /* Estilos omitidos por brevidade */
+    * { box-sizing: border-box; margin:0; padding:0 }
+    body { font-family: Arial, sans-serif; background: #f8f9fa; margin:20px }
+    h2,h3 { text-align:center; color:#fff; padding:15px; margin:20px 0; border-radius:5px }
+    h2 { background:#007BFF } h3 { background:#0056b3; font-size:20px }
+    form { background:#fff; padding:25px; border-radius:8px; max-width:900px; margin:auto; box-shadow:0 0 10px rgba(0,0,0,.1) }
+    .common-fields .row { display:flex; gap:30px; margin-bottom:10px }
+    .common-fields .row>div{flex:1}
+    label { display:block; margin-top:10px; font-weight:bold }
+    input,select{width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px}
+    .tabs-nav{list-style:none;display:flex;gap:10px;justify-content:center;margin-bottom:20px;border-bottom:2px solid #007BFF}
+    .tabs-nav li{flex:1;max-width:200px;padding:12px 0;background:#007BFF;color:#fff;text-align:center;cursor:pointer;border-top-left-radius:5px;border-top-right-radius:5px;transition:.2s}
+    .tabs-nav li.active{background:#0056b3}
+    .tab-content{display:none;padding:20px 0}
+    .tab-content.active{display:block}
+    .item-row,.merch-item-row{border:1px solid #ccc;padding:10px;border-radius:4px;margin-bottom:10px}
+    .item-row .row,.merch-item-row .row{display:flex;gap:30px;margin-bottom:10px}
+    .remove-item,.remove-merch-item{background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer}
+    #add-item-sell-out,#add-item-sell-in,#add-merch-item{background:#007BFF;color:#fff;border:none;margin-top:10px;padding:8px 16px;border-radius:4px}
+    .file-upload{margin-top:20px;text-align:center}
+    .file-upload label{font-weight:bold;display:block;margin-bottom:8px}
+    button:hover,.remove-item:hover,.remove-merch-item:hover{opacity:.9}
+    @media(max-width:600px){.common-fields .row,.item-row .row,.merch-item-row .row{flex-direction:column}.tabs-nav{flex-direction:column}}
   </style>
 </head>
 <body>
   <h2>Cadastro de Verba</h2>
   <form id="form-dossie">
-    <!-- Formulário omitido por brevidade -->
+    <div class="common-fields">
+      <div class="row">
+        <div><label>Rede</label><input name="rede"></div>
+        <div><label>Mercado</label><input name="mercado"></div>
+      </div>
+      <div class="row">
+        <div><label>Cidade</label><input name="cidade"></div>
+        <div><label>UF</label><input name="uf" maxlength="2"></div>
+      </div>
+      <div class="row">
+        <div><label>Vendedor</label><input name="vendedor"></div>
+        <div><label>Contrato</label><input name="contrato"></div>
+      </div>
+    </div>
+
+    <ul class="tabs-nav">
+      <li class="tab active" data-tab="sell-out">SELL OUT</li>
+      <li class="tab" data-tab="sell-in">SELL IN</li>
+      <li class="tab" data-tab="merch">MERCHANDISING</li>
+    </ul>
+
+    <div id="sell-out" class="tab-content active">
+      <h3>Itens – SELL OUT</h3>
+      <div id="items-container-sell-out">
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <select name="item_familia[]"></select>
+            </div>
+            <div>
+              <label>Produto</label>
+              <select name="item_produto[]"></select>
+            </div>
+            <div><label>Unidades</label><input type="number" class="item-unidades" name="item_unidades[]"></div>
+            <div><label>Bonificação (R$)</label><input step="0.001" type="number" class="item-bonificacao" name="item_bonificacao[]"></div>
+          </div>
+          <div class="row">
+            <div><label>Verba (R$)</label><input step="0.01" readonly class="item-verba" name="item_verba[]"></div>
+            <div><label>TTC (R$)</label><input step="0.01" type="number" name="item_ttc[]"></div>
+            <div><label>TTV (R$)</label><input step="0.01" type="number" name="item_ttv[]"></div>
+          </div>
+          <div style="text-align:right"><button type="button" class="remove-item">Remover</button></div>
+        </div>
+      </div>
+      <button type="button" id="add-item-sell-out">Adicionar item</button>
+    </div>
+
+    <div id="sell-in" class="tab-content">
+      <h3>Itens – SELL IN</h3>
+      <div id="items-container-sell-in">
+        <div class="item-row">
+          <div class="row">
+            <div>
+              <label>Família</label>
+              <select name="item_familia_in[]"></select>
+            </div>
+            <div>
+              <label>Produto</label>
+              <select name="item_produto_in[]"></select>
+            </div>
+            <div><label>Unidades</label><input type="number" class="item-unidades" name="item_unidades_in[]"></div>
+            <div><label>Bonificação (R$)</label><input step="0.001" type="number" class="item-bonificacao" name="item_bonificacao_in[]"></div>
+          </div>
+          <div class="row">
+            <div><label>Verba (R$)</label><input step="0.01" readonly class="item-verba" name="item_verba_in[]"></div>
+            <div><label>TTC (R$)</label><input step="0.01" type="number" name="item_ttc_in[]"></div>
+            <div><label>TTV (R$)</label><input step="0.01" type="number" name="item_ttv_in[]"></div>
+          </div>
+          <div style="text-align:right"><button type="button" class="remove-item">Remover</button></div>
+        </div>
+      </div>
+      <button type="button" id="add-item-sell-in">Adicionar item</button>
+    </div>
+
+    <div id="merch" class="tab-content">
+      <h3>Itens – Merchandising</h3>
+      <div id="merch-items-container">
+        <div class="merch-item-row">
+          <div class="row">
+            <div><label>Verba (R$)</label><input step="0.01" type="number" class="merch-item-verba" name="merch_item_verba[]"></div>
+            <div>
+              <label>Opção</label>
+              <select name="merch_item_opcao[]">
+                <option value="">Selecione…</option>
+                <option>PONTA DE GÔNDOLA</option>
+                <option>ÁREA FRIA</option>
+                <option>PONTO EXTRA</option>
+              </select>
+            </div>
+            <div><label>Foto</label><input type="file" accept="image/*" name="merch_item_photo[]"></div>
+          </div>
+          <div style="text-align:right"><button type="button" class="remove-merch-item">Remover</button></div>
+        </div>
+      </div>
+      <button type="button" id="add-merch-item">Adicionar item</button>
+    </div>
+
     <div class="file-upload">
-      <label for="dossie_files">Arquivos (PDF/Imagens):</label>
+      <label>Arquivos (.pdf, .jpg, .png)</label>
       <input type="file" id="dossie_files" name="dossie_files[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
     </div>
-    <button type="submit" class="btn-submit">Salvar e Gerar Dossiê</button>
+
+    <button type="submit">Salvar e Gerar Dossiê</button>
   </form>
 
+  <button id="btn-docusign" style="display:none; margin:20px auto; display:block;">
+    Enviar para Assinatura (DocuSign)
+  </button>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
   <script>
-    document.getElementById('form-dossie').addEventListener('submit', async function(event) {
-      event.preventDefault();
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1) CSV família→produto
+    const rawData = `
+REFRIKO,REFRIKO FRAMBOESA 6X2LT
+REFRIKO,TUBA JUJUBA GUARANA 6X2LT
+... todas as linhas ...
+REFRISHOW,REFRISHOW LARANJA 6X2LT
+`.trim();
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      // Dados básicos
-      const rede = document.getElementById('rede').value || 'Sem Rede';
-      const vendedor = document.getElementById('vendedor').value || '';
-      const uf = document.getElementById('uf').value || '';
-      const cidade = document.getElementById('cidade').value || '';
-
-      doc.text(`Dossiê de Verba`, 10, 10);
-      doc.text(`Rede: ${rede}`, 10, 20);
-      doc.text(`UF: ${uf}`, 10, 30);
-      doc.text(`Cidade: ${cidade}`, 10, 40);
-      doc.text(`Vendedor: ${vendedor}`, 10, 50);
-
-      let startY = 60;
-
-      // Função para adicionar tabelas ao PDF (omitida por brevidade)
-
-      // Adicionar arquivos (PDFs ou imagens)
-      const filesInput = document.getElementById('dossie_files');
-      if (filesInput.files.length > 0) {
-        // Criar um novo PDF usando pdf-lib para mesclar os PDFs
-        const mergedPdf = await PDFLib.PDFDocument.create();
-
-        // Converter o PDF principal (gerado pelo jsPDF) para bytes
-        const pdfBytes = await doc.output('arraybuffer');
-        const mainPdf = await PDFLib.PDFDocument.load(pdfBytes);
-
-        // Copiar as páginas do PDF principal para o PDF mesclado
-        const mainPages = await mergedPdf.copyPages(mainPdf, mainPdf.getPageIndices());
-        mainPages.forEach(page => mergedPdf.addPage(page));
-
-        for (const file of filesInput.files) {
-          if (file.type === 'application/pdf') {
-            try {
-              // Carregar o PDF anexado
-              const pdfBytes = await file.arrayBuffer();
-              const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-              const pages = pdfDoc.getPages();
-
-              // Copiar as páginas do PDF anexado para o PDF mesclado
-              const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-              copiedPages.forEach(page => mergedPdf.addPage(page));
-            } catch (error) {
-              console.error("Erro ao processar o PDF:", error);
-            }
-          } else {
-            // Processar Imagem
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-              const dataUrl = event.target.result;
-              const imgProps = await new Promise(resolve => {
-                const img = new Image();
-                img.src = dataUrl;
-                img.onload = () => resolve({ width: img.width, height: img.height });
-              });
-
-              const maxWidth = 180; // Largura máxima da imagem no PDF
-              const scale = maxWidth / imgProps.width;
-              const imgWidth = maxWidth;
-              const imgHeight = imgProps.height * scale;
-
-              // Adicionar uma nova página para a imagem
-              mergedPdf.addPage([imgWidth, imgHeight]);
-              const page = mergedPdf.getPage(mergedPdf.getPageCount() - 1);
-              const embeddedImage = await mergedPdf.embedPng(dataUrl);
-              page.drawImage(embeddedImage, {
-                x: 0,
-                y: 0,
-                width: imgWidth,
-                height: imgHeight,
-              });
-            };
-            reader.onerror = function(error) {
-              console.error("Erro ao ler o arquivo:", error);
-            };
-            reader.readAsDataURL(file);
-          }
-        }
-
-        // Salvar o PDF mesclado
-        const mergedPdfBytes = await mergedPdf.save();
-        const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `dossie-${rede}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } else {
-        // Se não houver arquivos anexados, salvar apenas o PDF principal
-        doc.save(`dossie-${rede}.pdf`);
-      }
+    // 2) Mapa família→produtos
+    const produtosPorFamilia = {};
+    rawData.split('\n').forEach(line => {
+      const [famRaw, prodRaw] = line.split(',');
+      if (!famRaw||!prodRaw) return;
+      const fam = famRaw.trim(), prod = prodRaw.trim();
+      produtosPorFamilia[fam] = produtosPorFamilia[fam]||[];
+      produtosPorFamilia[fam].push(prod);
     });
+    const familias = Object.keys(produtosPorFamilia);
+
+    // 3) bind família→produto
+    function bindFamilyProduct(row,isSellIn=false){
+      const famName = isSellIn?'item_familia_in[]':'item_familia[]';
+      const prodName= isSellIn?'item_produto_in[]':'item_produto[]';
+      const famSel  = row.querySelector(`select[name="${famName}"]`);
+      const prodSel = row.querySelector(`select[name="${prodName}"]`);
+      famSel.innerHTML = '<option value="">Selecione…</option>';
+      familias.forEach(f=> famSel.insertAdjacentHTML('beforeend', `<option>${f}</option>`));
+      famSel.addEventListener('change', ()=>{
+        const list = produtosPorFamilia[famSel.value]||[];
+        prodSel.innerHTML = '<option value="">Selecione…</option>';
+        list.forEach(p=> prodSel.insertAdjacentHTML('beforeend', `<option>${p}</option>`));
+      });
+    }
+    document.querySelectorAll('#items-container-sell-out .item-row').forEach(r=>bindFamilyProduct(r,false));
+    document.querySelectorAll('#items-container-sell-in .item-row').forEach(r=>bindFamilyProduct(r,true));
+
+    // 4) Abas
+    document.querySelectorAll('.tabs-nav li').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        document.querySelectorAll('.tabs-nav li').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 5) bind e clonagem
+    function bindLines(container,btnId,isMerch=false,isSellIn=false){
+      const ctr = document.getElementById(container);
+      ctr.addEventListener('click', e=>{
+        if((!isMerch && e.target.matches('.remove-item')) ||
+           (isMerch  && e.target.matches('.remove-merch-item'))){
+          const rows = isMerch? ctr.querySelectorAll('.merch-item-row') : ctr.querySelectorAll('.item-row');
+          if(rows.length>1) e.target.closest(isMerch?'.merch-item-row':'.item-row').remove();
+          else alert('Ao menos um item é obrigatório.');
+        }
+      });
+      ctr.addEventListener('input', e=>{
+        if(!isMerch && e.target.matches('.item-unidades, .item-bonificacao')){
+          const row = e.target.closest('.item-row');
+          const bon = parseFloat(row.querySelector('.item-bonificacao').value)||0;
+          const und = parseFloat(row.querySelector('.item-unidades').value)||0;
+          row.querySelector('.item-verba').value = (bon*und).toFixed(2);
+        }
+      });
+      document.getElementById(btnId).addEventListener('click', ()=>{
+        const tpl = ctr.querySelector(isMerch?'.merch-item-row':'.item-row');
+        const nw  = tpl.cloneNode(true);
+        nw.querySelectorAll('input').forEach(i=>{ if(i.type!=='file') i.value=''; });
+        nw.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+        ctr.appendChild(nw);
+        if(!isMerch) bindFamilyProduct(nw,isSellIn);
+      });
+    }
+    bindLines('items-container-sell-out','add-item-sell-out',false,false);
+    bindLines('items-container-sell-in','add-item-sell-in',false,true);
+    bindLines('merch-items-container','add-merch-item',true,false);
+
+    // 6) coleta dados
+    function collectRows(id){
+      return Array.from(document.getElementById(id).querySelectorAll('.item-row'))
+        .map(r=>[
+          r.querySelector('[name^="item_familia"]').value||'',
+          r.querySelector('[name^="item_produto"]').value||'',
+          r.querySelector('[name^="item_unidades"]').value||'',
+          r.querySelector('[name^="item_bonificacao"]').value||'',
+          r.querySelector('[name^="item_verba"]').value||'',
+          r.querySelector('[name^="item_ttc"]').value||'',
+          r.querySelector('[name^="item_ttv"]').value||''
+        ]).filter(r=>r.some(c=>c!==''));
+    }
+    function collectMerch(){
+      return Array.from(document.querySelectorAll('.merch-item-row'))
+        .map(r=>[
+          r.querySelector('[name="merch_item_verba[]"]').value||'',
+          r.querySelector('[name="merch_item_opcao[]"]').value||''
+        ]).filter(r=>r.some(c=>c!==''));
+    }
+
+    // 7) submit + geração PDF
+    document.getElementById('form-dossie').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF(), f = e.target;
+      let y = 20;
+
+      // pré-carrega fotos merch → DataURLs
+      const merchInputs = Array.from(document.querySelectorAll('input[name="merch_item_photo[]"]'));
+      const merchFiles = merchInputs.flatMap(i=>Array.from(i.files));
+      const merchPhotosData = await Promise.all(
+        merchFiles.map(file=> new Promise(res=>{
+          const r = new FileReader();
+          r.onload = ()=> res({ dataUrl: r.result, type: file.type });
+          r.readAsDataURL(file);
+        }))
+      );
+
+      // cabeçalho
+      doc.setFontSize(18); doc.text('Dossiê de Verba',14,y); y+=10;
+      doc.setFontSize(12);
+      doc.text(`Rede: ${f.rede.value}`,14,y); y+=6;
+      doc.text(`Mercado: ${f.mercado.value}`,14,y); y+=6;
+      doc.text(`Cidade/UF: ${f.cidade.value} - ${f.uf.value}`,14,y); y+=6;
+      doc.text(`Vendedor: ${f.vendedor.value}`,14,y); y+=10;
+
+      // SELL OUT
+      const out = collectRows('items-container-sell-out');
+      if(out.length){
+        doc.setFontSize(14); doc.text('SELL OUT',14,y); y+=8;
+        doc.autoTable({ startY:y,
+          head:[['FAMÍLIA','PRODUTO','UNIDADES','BONIFICAÇÃO','VERBA','TTC','TTV']],
+          body:out, theme:'grid',
+          headStyles:{ fillColor:[0,123,255], textColor:255, fontStyle:'bold' }
+        });
+        y = doc.lastAutoTable.finalY + 10;
+      }
+
+      // SELL IN
+      const sin = collectRows('items-container-sell-in');
+      if(sin.length){
+        doc.setFontSize(14); doc.text('SELL IN',14,y); y+=8;
+        doc.autoTable({ startY:y,
+          head:[['FAMÍLIA','PRODUTO','UNIDADES','BONIFICAÇÃO','VERBA','TTC','TTV']],
+          body:sin, theme:'grid',
+          headStyles:{ fillColor:[40,167,69], textColor:255, fontStyle:'bold' }
+        });
+        y = doc.lastAutoTable.finalY + 10;
+      }
+
+      // MERCHANDISING com padding e coluna larga
+      const mch = collectMerch();
+      if(mch.length){
+        doc.setFontSize(14); doc.text('MERCHANDISING',14,y); y+=8;
+        doc.autoTable({
+          startY:y,
+          head:[['VERBA (R$)','OPÇÃO','FOTO']],
+          body:mch.map((r,i)=>[r[0],r[1],'']),
+          theme:'grid',
+          styles:{ cellPadding:6 },
+          columnStyles:{ 2:{ cellWidth:24 } },
+          headStyles:{ fillColor:[255,193,7], textColor:0, fontStyle:'bold' },
+          didDrawCell:data=>{
+            if(data.section==='body' && data.column.index===2){
+              const imgObj=merchPhotosData[data.row.index];
+              if(!imgObj) return;
+              const mode=imgObj.type.includes('png')?'PNG':'JPEG';
+              doc.addImage(imgObj.dataUrl,mode,data.cell.x+4,data.cell.y+4,16,16);
+            }
+          }
+        });
+        y = doc.lastAutoTable.finalY + 10;
+      }
+
+      // assinaturas
+      let total=0; out.forEach(r=>total+=parseFloat(r[4])||0); sin.forEach(r=>total+=parseFloat(r[4])||0);
+      doc.setFontSize(12);
+      doc.text('Assinaturas:',14,y); y+=10;
+      doc.text('______________________________',14,y); y+=6;
+      doc.text('RAFAEL SPERB',14,y); y+=15;
+      doc.text('______________________________',14,y); y+=6;
+      doc.text('WELLINGTON MARTINS',14,y); y+=15;
+      if(total>=15000){
+        doc.text('______________________________',14,y); y+=6;
+        doc.text('MARCIO MENDES',14,y); y+=15;
+      }
+
+      // mescla jsPDF + anexos gerais
+      const jsPdfBytes = doc.output('arraybuffer');
+      const pdfDoc = await PDFLib.PDFDocument.load(jsPdfBytes);
+      for(const file of f.dossie_files.files){
+        const buf = await file.arrayBuffer();
+        if(file.type==='application/pdf'){
+          const src = await PDFLib.PDFDocument.load(buf);
+          const pages = await pdfDoc.copyPages(src,src.getPageIndices());
+          pages.forEach(p=>pdfDoc.addPage(p));
+        } else {
+          const img = file.type.includes('png')
+            ? await pdfDoc.embedPng(buf)
+            : await pdfDoc.embedJpg(buf);
+          const {width,height} = img.scaleToFit(595,841);
+          const pg = pdfDoc.addPage([595,841]);
+          pg.drawImage(img,{x:0,y:841-height,width,height});
+        }
+      }
+
+      // páginas com fotos de merchandising ampliadas
+      for(let i=0;i<merchPhotosData.length;i++){
+        const {dataUrl,type} = merchPhotosData[i];
+        const img = type.includes('png')
+          ? await pdfDoc.embedPng(dataUrl)
+          : await pdfDoc.embedJpg(dataUrl);
+        const {width,height} = img.scaleToFit(400,400);
+        const pg = pdfDoc.addPage([595,841]);
+        const helvB = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+        pg.drawText(`Foto ${i+1}`,{x:20,y:841-height-60,size:12,font:helvB});
+        pg.drawImage(img,{x:20,y:841-height-40,width,height});
+      }
+
+      const finalBytes = await pdfDoc.save();
+      download(finalBytes,`dossie_${f.rede.value||'sem-rede'}.pdf`,'application/pdf');
+      document.getElementById('btn-docusign').style.display='block';
+    });
+
+    document.getElementById('btn-docusign').addEventListener('click',()=>{
+      alert('Enviar para DocuSign (stub)');
+    });
+  });
   </script>
 </body>
 </html>
